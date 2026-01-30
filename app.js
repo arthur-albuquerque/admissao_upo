@@ -27,6 +27,26 @@ function toggleAllergyInput(checkbox) {
     }
 }
 
+function toggleClexane(checkbox) {
+    const dataInput = document.getElementById('heparina_data');
+    const horaInput = document.getElementById('heparina_hora');
+    dataInput.disabled = !checkbox.checked;
+    horaInput.disabled = !checkbox.checked;
+
+    // Set default rounded time when checked
+    if (checkbox.checked) {
+        if (!dataInput.value) {
+            const tomorrow = new Date();
+            tomorrow.setDate(tomorrow.getDate() + 1);
+            dataInput.valueAsDate = tomorrow;
+        }
+
+        if (!horaInput.value) {
+            horaInput.value = '18:00';
+        }
+    }
+}
+
 // Logic: BMI Calculation
 function calculateBMI() {
     const weight = parseFloat(document.getElementById('peso').value);
@@ -53,119 +73,245 @@ function generateSummary() {
             .join(', ');
     };
 
+    // Helper: Format Date dd/mm
+    const formatDate = (dateStr) => {
+        if (!dateStr) return '';
+        const [y, m, d] = dateStr.split('-');
+        return `${d}/${m}`;
+    };
+
+    const rawDate = getValue('data_admissao');
+    const dateFormatted = formatDate(rawDate);
+
     const data = {
-        data: getValue('data_admissao'),
+        data: dateFormatted,
         hora: getValue('hora_admissao'),
         idade: getValue('idade'),
         sexo: getValue('sexo'),
-        imc: document.getElementById('imc_display').textContent,
-        peso: getValue('peso'),
-        alergias: document.getElementById('nega_alergia').checked ? 'Nega' : getValue('alergia_detalhe'),
-        cirurgia: getValue('cirurgia'),
         equipe: getValue('equipe'),
-        meds_hab: getValue('meds_habituais'),
+        peso: getValue('peso'), // Added peso for section1 logic
+        altura: getValue('altura'),
+        imc: document.getElementById('imc_display').textContent,
+
+        // Section 2
+        cirurgia: getValue('cirurgia'),
+        info_pre_op: getValue('info_pre_op'),
+        duracao_h: document.querySelector('input[name="duracao_h"]')?.value || '',
+        duracao_min: document.querySelector('input[name="duracao_min"]')?.value || '',
+
+        // Intra-op
+        crist: getValue('cristaloide'),
+        col: getValue('coloide'),
+        anestesia_tipo: getChecked('anestesia'),
+        anestesia_drogas: getValue('anestesia_drogas'),
+        sang: getValue('sangramento'),
+        diu: getValue('diurese'),
+        sds_med: getChecked('sds_med'),
+        sds_outros: getValue('sds_outros'),
+        transf: getValue('transfusao'),
+        bh_outros: getValue('bh_outros'), // Not used in example but available
+
+        // History
         comorb_list: getChecked('comorb'),
         comorb_outros: getValue('comorb_outros'),
-
-        // Peri-Op
+        meds_hab: getValue('meds_habituais'),
+        alergias: document.getElementById('nega_alergia').checked ? 'Nega alergia' : `Alergia: ${getValue('alergia_detalhe')}`,
         vad: getRadio('vad'),
         cormack: getValue('cormack'),
         disp_iot: getRadio('disp_iot'),
-        bougie: getChecked('bougie') ? 'Sim' : '',
+        bougie: getChecked('bougie'),
 
+        // Other
         atb_nome: getValue('antibiotico'),
-        atb_hora: getValue('atb_hora'),
-        atb_conduta: getRadio('conduta_atb'),
-
-        anestesia_tipo: getChecked('anestesia'),
-        anestesia_drogas: getValue('anestesia_drogas'),
-
-        sds_med: getChecked('sds_med'),
-        sds_outros: getValue('sds_outros'),
-
-        crist: getValue('cristaloide'),
-        col: getValue('coloide'),
-        diu: getValue('diurese'),
-        sang: getValue('sangramento'),
-        transf: getValue('transfusao'),
-        bh_outros: getValue('bh_outros'),
-
-        intercorrencias: getValue('intercorrencias'),
-
-        // CTI
-        neuro: getRadio('neuro'),
-        sv: `PA: ${getValue('sv_pa')} / FC: ${getValue('sv_fc')} / SpO2: ${getValue('sv_spo2')}`,
-        inv_pam: getChecked('invasao').includes('PAM') ? `PAM (${getValue('inv_pam_loc')})` : '',
-        inv_pvp: getChecked('invasao').includes('PVP') ? `PVP (${getValue('inv_pvp_loc')})` : '',
+        inv_list: getChecked('invasao').split(', ').filter(i => i), // Array
+        inv_pam: getValue('inv_pam_loc'),
+        inv_pvp: getValue('inv_pvp_loc'),
         drenos: getValue('drenos'),
 
-        // Orientacoes
-        cabeceira: getRadio('cabeceira') === 'Limitada' ? `Limitada a ${getValue('cabeceira_graus')}°` : getRadio('cabeceira'),
-        deambular: getRadio('deambular'),
-        alta_visita: getRadio('alta_visita'),
-        mob_esp: getRadio('cuidados_mob') === 'Sim' ? getValue('mob_especificar') : 'Não',
-        dieta: getRadio('dieta') === 'Liberada' ? `Liberada após ${getValue('dieta_tempo')}` : getRadio('dieta'),
-        compressor: document.querySelector('input[name="compressor"]:checked') ? 'Sim' : 'Não',
-        heparina: (getValue('heparina_data') || getValue('heparina_hora')) ? `Iniciar ${getValue('heparina_data')} às ${getValue('heparina_hora')}` : 'Não prescrito',
-        clinica: getRadio('clinica_medica')
+        // Prophylaxis / Checklist Logic
+        dieta: getRadio('dieta'),
+        dieta_tempo: getValue('dieta_tempo'),
+        clexane_check: document.getElementById('check_clexane').checked,
+        heparina_data: getValue('heparina_data'),
+        heparina_hora: getValue('heparina_hora'),
+        compressor: document.querySelector('input[name="compressor"]:checked'),
+        deambular: getRadio('deambular')
     };
 
-    // Clean Invasions string to remove PAM/PVP general labels if locations are specified
-    // A simpler approach for valid listing:
-    let invs = getChecked('invasao').split(', ').filter(i => i !== 'PAM' && i !== 'PVP');
-    if (data.inv_pam) invs.unshift(data.inv_pam);
-    if (data.inv_pvp) invs.unshift(data.inv_pvp);
-    const invasionsStr = invs.join(', ') || 'Ausentes';
+    // --- BUILD TEXT ---
 
-    // Construct refined Text
-    let summary = `*ADMISSÃO CTI PÓS-OPERATÓRIO*
-📅 ${data.data} às ${data.hora}
+    // SECTION 1
+    // Nome placeholder
+    // Age
+    // Peso (if exists)
+    // MA: Equipe
+    let section1 = `Nome,\n${data.idade} anos`;
+    if (data.peso) {
+        section1 += `\n${data.peso} kg`;
+    }
+    if (data.altura) {
+        section1 += `\n${data.altura} m`;
+    }
+    if (data.imc && data.imc !== '-') {
+        section1 += `\nIMC ${data.imc}`;
+    }
+    section1 += `\n\nMA: ${data.equipe}\n\n—---------------------------------`;
 
-*ID:* ${data.idade}a, ${data.sexo} | IMC: ${data.imc}
-*Proc:* ${data.cirurgia}
-*Equipe:* ${data.equipe}
+    // Antibiotic
+    let antibioticLine = data.atb_nome ? `${data.data} ${data.atb_nome}` : '';
 
-*Antecedentes:* ${data.comorb_list} ${data.comorb_outros ? `(${data.comorb_outros})` : ''}
-*Meds Habituais:* ${data.meds_hab || '-'}
-*Alergias:* ${data.alergias}
+    // Invasions
+    // Map Invasions to "Date Item"
+    let invasionsLines = [];
 
-*INTRA-OPERATÓRIO*
-*Via Aérea:* ${data.vad} ${data.cormack ? `(Cormack ${data.cormack})` : ''}
-- Disp: ${data.disp_iot || '-'} ${data.bougie ? '(+Bougie)' : ''}
+    // Process known invasions with locals
+    data.inv_list.forEach(inv => {
+        let text = inv;
+        if (inv === 'PAM' && data.inv_pam) text += ` (${data.inv_pam})`;
+        if (inv === 'PVP' && data.inv_pvp) text += ` (${data.inv_pvp})`;
+        invasionsLines.push(`${data.data} ${text}`);
+    });
 
-*Anestesia:* ${data.anestesia_tipo}
-- Drogas: ${data.anestesia_drogas || '-'}
+    // Drains
+    if (data.drenos) {
+        invasionsLines.push(`${data.data} ${data.drenos}`);
+    }
+    // CVD is in inv_list usually if checked, or separate? 
+    // In index.html CVD is a checkbox value="CVD" in 'invasao', so it's covered by inv_list.
 
-*ATB:* ${data.atb_nome || '-'} (Última: ${data.atb_hora || '-'})
-- Conduta: ${data.atb_conduta || '-'}
+    section1 += antibioticLine ? `\n${antibioticLine}` : '';
+    if (invasionsLines.length > 0) section1 += `\n\n${invasionsLines.join('\n')}`;
 
-*Saída de Sala:* ${data.sds_med} ${data.sds_outros ? `+ ${data.sds_outros}` : ''}
 
-*Balanço:*
-- Crist: ${data.crist || '-'} / Col: ${data.col || '-'}
-- Diurese: ${data.diu || '-'} | Sang: ${data.sang || '-'}
-- Transfusão: ${data.transf || '0'}
-${data.bh_outros ? `- Outros: ${data.bh_outros}` : ''}
+    // SECTION 2
+    // Date PO Surgery (InfoPreOp)
+    let surgeryLine = `${data.data} PO ${data.cirurgia}`;
+    if (data.info_pre_op) surgeryLine += ` (${data.info_pre_op})`;
 
-*Intercorrências:* ${data.intercorrencias || 'Nenhuma'}
+    // IntraOp Details
+    // 05:00 CC / HV 1000ml / Anestesia ...
+    let durationStr = '';
+    if (data.duracao_h || data.duracao_min) {
+        durationStr = `CC ${data.duracao_h || '0'}h`;
+        if (data.duracao_min && data.duracao_min !== '0' && data.duracao_min !== '00') {
+            durationStr += `${data.duracao_min}`;
+        }
+    }
 
-*ADMISSÃO*
-*Neuro:* ${data.neuro || '-'}
-*Sinais:* ${data.sv}
-*Invasões:* ${invasionsStr}
-*Drenos:* ${data.drenos || 'Ausentes'}
+    // HV calculation
+    let cristVol = parseInt(data.crist) || 0;
+    let colVol = parseInt(data.col) || 0;
+    let totalHV = cristVol + colVol;
+    let hvStr = totalHV > 0 ? `HV ${totalHV}ml` : ''; // Or separate if needed, example shows sum? "HV 1000ml"
 
-*ORIENTAÇÕES*
-- Cabeceira: ${data.cabeceira || '-'}
-- Deambular (12-24h): ${data.deambular || '-'}
-- Visita Alta: ${data.alta_visita || '-'}
-- Mob. Esp.: ${data.mob_esp}
-- Dieta: ${data.dieta || '-'}
-- Compressor: ${data.compressor}
-- Heparina: ${data.heparina}
-- Acomp. CM: ${data.clinica || '-'}`;
+    // Anesthesia
+    let anestesiaStr = `Anestesia ${data.anestesia_tipo}`;
+    if (data.anestesia_drogas) anestesiaStr += ` com ${data.anestesia_drogas}`;
 
-    document.getElementById('summaryText').textContent = summary.replace(/^\s*[\r\n]/gm, ''); // Trim empty lines
+    // Meds Saida Sala
+    let medsExit = [];
+    if (data.sds_med) medsExit.push(data.sds_med);
+    if (data.sds_outros) medsExit.push(data.sds_outros);
+    let medsExitStr = medsExit.join(' + ');
+
+    let intraOpLine = [
+        durationStr,
+        hvStr,
+        anestesiaStr,
+        `Sangramento ${data.sang || '-'}`,
+        `Diurese ${data.diu || '-'}`,
+        medsExitStr
+    ].filter(s => s).join(' / ');
+
+    // Transfusions
+    let transfLine = data.transf ? `Hemotransfusões: ${data.transf} ${data.data}` : '';
+
+    let section2 = `${surgeryLine}\n${intraOpLine}`;
+    if (transfLine) section2 += `\n\n${transfLine}`;
+    section2 += `\n—-------------------------------------------------------------------------------------------------------`;
+
+    // History
+    let comorbStr = data.comorb_list;
+    if (data.comorb_outros) comorbStr += (comorbStr ? `; ${data.comorb_outros}` : data.comorb_outros);
+
+    let section2Part2 = `HPP: ${comorbStr || 'Nega'}\n\nEm uso de: ${data.meds_hab || 'Nega'}`;
+
+    // Allergy & Airway
+    let allergyLine = data.alergias;
+
+    // Airway Logic
+    let airwayBase = data.vad === 'Sim' ? 'VAD' : 'VA ok';
+    let airwayLine = airwayBase;
+
+    if (data.cormack) {
+        airwayLine += ` - Cormack ${data.cormack}`;
+    }
+
+    let disp = data.disp_iot === 'Videolaringo' ? 'VL' : data.disp_iot;
+    if (disp) {
+        // Use " - " separator or " com "? Example shows " - VL"
+        // Previous request: "VAD - Cormack II com VL + bougie"
+        // Current request example: "VA ok - VL + bougie"
+        // Let's use " - " as separator if Cormack is present, or append to base?
+        // Let's standardize on " - " for the device part to match the requested example
+        airwayLine += ` - ${disp}`;
+    }
+
+    if (data.bougie && data.bougie.includes('Sim')) {
+        airwayLine += ` + Bougie`;
+    }
+
+    section2 += `\n${section2Part2}\n\n${allergyLine}\n${airwayLine}`;
+
+
+    // SECTION 3 - Checklist
+    // Logic for Dieta
+    let dietCheck = '( )';
+    let dietText = 'Dieta liberada?';
+    if (data.dieta && data.dieta.includes('Liberada')) {
+        dietCheck = '(x)';
+        dietText += ` a partir de ${data.dieta_tempo || ''}`;
+    } else if (data.dieta) {
+        dietText += ` ${data.dieta}`;
+    }
+
+    // Logic for Clexane/Heparin/Compressor
+    let clexaneCheck = '( )';
+    let clexaneText = 'Clexane?';
+    if (data.clexane_check) {
+        clexaneCheck = '(x)';
+        if (data.heparina_data || data.heparina_hora) {
+            clexaneText += ` Iniciar ${formatDate(data.heparina_data)} às ${data.heparina_hora}`;
+        }
+    } else if (data.compressor) {
+        clexaneCheck = '(-)';
+        clexaneText += ' não, CPMI';
+    }
+
+    // Logic for Deambular
+    let walkCheck = data.deambular === 'Sim' ? '(x)' : '( )';
+
+    let section3 = `
+(  ) Admissão
+(  ) Prescrição
+(  ) Rx agora
+(  ) Lab agora
+(  ) Lab rotina 
+${dietCheck} ${dietText}
+${clexaneCheck} ${clexaneText}
+${walkCheck} deambular em 12h
+(x) Checar reconciliação
+(  ) Nome do familiar / acompanhante
+(  ) Coletar TCI
+(  ) Protocolo de TEV
+(  ) Parametrização na prescrição 
+(  ) Check Prontuario fisico`;
+
+    // Final Assembly
+    // Using explicit newlines for spacing as requested
+    let summary = `${section1}\n\n\n\n${section2}\n\n\n${section3}`;
+
+    document.getElementById('summaryText').textContent = summary.trim();
     document.getElementById('summaryModal').classList.add('open');
 }
 
@@ -184,6 +330,24 @@ function copyToClipboard() {
             btn.textContent = original;
             btn.style.backgroundColor = '';
         }, 2000);
+    });
+}
+
+function copyAndOpenDontpad() {
+    const text = document.getElementById('summaryText').textContent;
+    navigator.clipboard.writeText(text).then(() => {
+        const btn = document.getElementById('btnDontpad');
+        const original = btn.textContent;
+        btn.textContent = 'Copiado! Cole no Dontpad';
+        btn.style.backgroundColor = '#10b981'; // Green for success
+
+        // Open in new tab
+        window.open('http://dontpad.com/admissao_upo2026', '_blank');
+
+        setTimeout(() => {
+            btn.textContent = original;
+            btn.style.backgroundColor = '#3b82f6'; // Revert to original blue
+        }, 3000);
     });
 }
 

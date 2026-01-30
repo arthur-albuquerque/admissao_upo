@@ -126,7 +126,7 @@
             </div>
 
             <!-- 2. PERI E PÓS OPERATÓRIAS -->
-            <div class="card collapsed">
+            <div class="card">
                 <div class="section-header" onclick="toggleSection(this)">
                     <span class="section-title">2. Peri e Pós-Op</span>
                     <span class="toggle-icon">▼</span>
@@ -235,7 +235,7 @@
             </div>
 
             <!-- 3. ADMISSÃO NO CTI -->
-            <div class="card collapsed">
+            <div class="card">
                 <div class="section-header" onclick="toggleSection(this)">
                     <span class="section-title">3. Admissão CTI (Exame Físico)</span>
                     <span class="toggle-icon">▼</span>
@@ -359,10 +359,16 @@
                     </div>
 
                     <div class="form-group">
-                        <label>Heparina SC</label>
+                        <label>Clexane</label>
+                        <div class="checkbox-group" style="margin-bottom: 8px;">
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="check_clexane" onchange="toggleClexane(this)"> Prescrever
+                                Clexane?
+                            </label>
+                        </div>
                         <div class="grid-2">
-                            <input type="date" id="heparina_data">
-                            <input type="time" id="heparina_hora">
+                            <input type="date" id="heparina_data" disabled>
+                            <input type="time" id="heparina_hora" disabled>
                         </div>
                     </div>
 
@@ -398,6 +404,9 @@
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" onclick="closeModal()">Fechar</button>
                 <button type="button" class="btn btn-primary" onclick="copyToClipboard()">Copiar Texto</button>
+                <button type="button" id="btnDontpad" class="btn btn-secondary"
+                    style="background-color: #3b82f6; color: white; border: none;" onclick="copyAndOpenDontpad()">Copiar
+                    e Abrir Dontpad</button>
             </div>
         </div>
     </div>
