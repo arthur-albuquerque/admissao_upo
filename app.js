@@ -291,13 +291,24 @@ function generateClinicalSummary() {
     };
     const dateFormatted = formatDate(rawDate);
 
-    // Instabilities
-    const instStr = [
-        `Neurológica: ${data.inst_neuro || '-'}`,
-        `Hemodinâmica: ${data.inst_hemo || '-'}`,
-        `Ventilatória: ${data.inst_vent || '-'}`,
-        `Dor Forte: ${data.inst_dor || '-'}`
-    ].join(' | ');
+    // Instabilities - New Format
+    const instLines = [];
+    const formatInst = (val, label) => {
+        if (val === 'Não') return `+ ${label} ok`;
+        if (val === 'Sim') {
+            if (label.toLowerCase() === 'dor forte') return `- Dor forte`;
+            return `- Instabilidade ${label.toLowerCase()}`;
+        }
+        return `? ${label}: -`;
+    };
+
+    instLines.push(formatInst(data.inst_neuro, 'Neurológico'));
+    instLines.push(formatInst(data.inst_vent, 'Ventilatório'));
+    instLines.push('');
+    instLines.push(formatInst(data.inst_hemo, 'Hemodinâmica'));
+    instLines.push(formatInst(data.inst_dor, 'Dor forte'));
+
+    const instStr = instLines.join('\n');
 
     // Invasions
     let invList = Array.isArray(data.clin_invasao) ? data.clin_invasao : (data.clin_invasao ? [data.clin_invasao] : []);
@@ -319,14 +330,11 @@ function generateClinicalSummary() {
         invasionStrings.push(itemWithDate);
     });
 
-    let invStr = invasionStrings.join(', ') || 'Nenhuma';
+    let invStr = invasionStrings.join('\n') || 'Nenhuma invasão';
 
-    const summary = `*ADMISSÃO CLÍNICA*\n` +
-        `Leito: ${leito}\n` +
-        `—----------------------------------\n` +
-        `INSTABILIDADE:\n${instStr}\n` +
-        `—----------------------------------\n` +
-        `INVASÕES: ${invStr}\n`;
+    const summary = `${leito}\n\n\n` +
+        `${instStr}\n\n\n` +
+        `${invStr}`;
 
     document.getElementById('summaryText').textContent = summary.trim();
     document.getElementById('summaryModal').classList.add('open');
@@ -531,13 +539,24 @@ function generateSummary() {
     section1 += `\n\nMA: ${data.equipe}\n\n—---------------------------------`;
 
 
-    // Instability String
-    const instStr = [
-        `Neurológica: ${data.inst_neuro || '-'}`,
-        `Hemodinâmica: ${data.inst_hemo || '-'}`,
-        `Ventilatória: ${data.inst_vent || '-'}`,
-        `Dor Forte: ${data.inst_dor || '-'}`
-    ].join(' | ');
+    // Instability String - New Format
+    const instLines = [];
+    const formatInst = (val, label) => {
+        if (val === 'Não') return `+ ${label} ok`;
+        if (val === 'Sim') {
+            if (label.toLowerCase() === 'dor forte') return `- Dor forte`;
+            return `- Instabilidade ${label.toLowerCase()}`;
+        }
+        return `? ${label}: -`;
+    };
+
+    instLines.push(formatInst(data.inst_neuro, 'Neurológico'));
+    instLines.push(formatInst(data.inst_vent, 'Ventilatório'));
+    instLines.push('');
+    instLines.push(formatInst(data.inst_hemo, 'Hemodinâmica'));
+    instLines.push(formatInst(data.inst_dor, 'Dor forte'));
+
+    const instStr = instLines.join('\n');
 
     // (Existing building logic for sections...)
     // I need to make sure I don't break the existing code flow.
@@ -653,7 +672,7 @@ ${walkCheck} deambular em 12h
 (  ) Parametrização na prescrição 
 (  ) Check Prontuario fisico`;
 
-    let summary = `${section1}\n\n\n\n${section2}\n\n\nINSTABILIDADE:\n${instStr}\n\n\n${section3}`;
+    let summary = `${section1}\n\n\nINSTABILIDADE:\n${instStr}\n\n—---------------------------------\n${section2}\n\nOrientações:\n${section3}`;
 
     document.getElementById('summaryText').textContent = summary.trim();
     document.getElementById('summaryModal').classList.add('open');
