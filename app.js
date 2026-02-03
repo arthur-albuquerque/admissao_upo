@@ -383,9 +383,7 @@ function generateClinicalSummary() {
 
     let invStr = invasionStrings.join('\n') || 'Nenhuma invasão';
 
-    const summary = `${leito}\n\n\n` +
-        `${instStr}\n\n\n` +
-        `${invStr}`;
+    const summary = `${leito}\n\n\n${instStr}\n\n\n${invStr}`;
 
     document.getElementById('summaryText').textContent = summary.trim();
     document.getElementById('summaryModal').classList.add('open');
