@@ -338,8 +338,8 @@ function generateClinicalSummary() {
         return `? ${label}: -`;
     };
 
-    instLines.push(formatInst(data.inst_neuro, 'Neurológico'));
-    instLines.push(formatInst(data.inst_vent, 'Ventilatório'));
+    instLines.push(formatInst(data.inst_neuro, 'Neurológica'));
+    instLines.push(formatInst(data.inst_vent, 'Ventilatória'));
     instLines.push('');
     instLines.push(formatInst(data.inst_hemo, 'Hemodinâmica'));
     instLines.push(formatInst(data.inst_dor, 'Dor forte'));
@@ -595,8 +595,8 @@ function generateSummary() {
 
     const items = [
         { val: data.inst_hemo, label: 'Hemodinâmica' },
-        { val: data.inst_neuro, label: 'Neurológico' },
-        { val: data.inst_vent, label: 'Ventilatório' },
+        { val: data.inst_neuro, label: 'Neurológica' },
+        { val: data.inst_vent, label: 'Ventilatória' },
         { val: data.inst_dor, label: 'Dor forte' }
     ];
 
