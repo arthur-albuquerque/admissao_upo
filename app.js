@@ -499,7 +499,7 @@ function generateSummary() {
     if (data.peso) section1 += `\n${data.peso} kg`;
     if (data.altura) section1 += `\n${data.altura} m`;
     if (data.imc && data.imc !== '-') section1 += `\nIMC ${data.imc}`;
-    section1 += `\n\nEquipe: ${data.equipe}\n\n—---------------------------------`;
+    section1 += `\n\nMA: ${data.equipe}\n\n—---------------------------------`;
 
 
     // Instability String
@@ -555,13 +555,12 @@ function generateSummary() {
 
     let intraOpLine = [
         durationStr,
-        `Cristaloide: ${data.crist || '0'}ml`,
-        `Coloide: ${data.col || '0'}ml`,
-        `Sangramento: ${data.sang || '-'}`,
-        `Diurese: ${data.diu || '-'}`,
+        hvStr,
         anestesiaStr,
+        `Sangramento ${data.sang || '-'}`,
+        `Diurese ${data.diu || '-'}`,
         medsExitStr
-    ].filter(s => s).join('\n');
+    ].filter(s => s).join(' / ');
 
     let transfLine = data.transf ? `Hemotransfusões: ${data.transf} ${data.data}` : '';
 
