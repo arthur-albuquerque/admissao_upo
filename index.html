@@ -14,7 +14,7 @@
     <link rel="apple-touch-icon" href="icon-192.png">
 
     <title>Admissão UPO</title>
-    <link rel="stylesheet" href="style.css?v=2.2">
+    <link rel="stylesheet" href="style.css?v=2.3">
 
     <!-- Register Service Worker -->
     <script>
@@ -83,10 +83,14 @@
                         <span class="section-title">1. Identificação</span>
                     </div>
                     <div class="section-content">
-                        <div class="grid-2">
+                        <div class="grid-3">
+                            <div class="form-group">
+                                <label>Data</label>
+                                <input type="date" id="clin_data" name="clin_data">
+                            </div>
                             <div class="form-group">
                                 <label>Leito</label>
-                                <input type="text" id="clin_leito" name="clin_leito" placeholder="Ex: 101-A">
+                                <input type="text" id="clin_leito" name="clin_leito" placeholder="Ex: 315">
                             </div>
                             <div class="form-group">
                                 <label>Horário</label>
@@ -203,10 +207,14 @@
                         <span class="toggle-icon">▼</span>
                     </div>
                     <div class="section-content">
-                        <div class="grid-2">
+                        <div class="grid-3">
                             <div class="form-group">
                                 <label>Data</label>
                                 <input type="date" id="data_admissao" name="data_admissao">
+                            </div>
+                            <div class="form-group">
+                                <label>Leito</label>
+                                <input type="text" id="leito_admissao" name="leito_admissao" placeholder="Ex: 315">
                             </div>
                             <div class="form-group">
                                 <label>Hora</label>
@@ -585,6 +593,55 @@
                     </div>
                 </div>
 
+                <!-- 5. HÁ INSTABILIDADE? -->
+                <div class="card">
+                    <div class="section-header" onclick="toggleSection(this)">
+                        <span class="section-title">5. Há Instabilidade?</span>
+                        <span class="toggle-icon">▼</span>
+                    </div>
+                    <div class="section-content">
+                        <p class="mb-2 text-light" style="font-size: 0.85rem;">Selecione uma opção para cada item:</p>
+                        <div class="instability-grid">
+                            <div class="instability-item">
+                                <label>Neurológica</label>
+                                <div class="radio-group-horizontal">
+                                    <label class="radio-label"><input type="radio" name="inst_neuro_surg" value="Não">
+                                        Não</label>
+                                    <label class="radio-label"><input type="radio" name="inst_neuro_surg" value="Sim">
+                                        Sim</label>
+                                </div>
+                            </div>
+                            <div class="instability-item">
+                                <label>Hemodinâmica</label>
+                                <div class="radio-group-horizontal">
+                                    <label class="radio-label"><input type="radio" name="inst_hemo_surg" value="Não">
+                                        Não</label>
+                                    <label class="radio-label"><input type="radio" name="inst_hemo_surg" value="Sim">
+                                        Sim</label>
+                                </div>
+                            </div>
+                            <div class="instability-item">
+                                <label>Ventilatória</label>
+                                <div class="radio-group-horizontal">
+                                    <label class="radio-label"><input type="radio" name="inst_vent_surg" value="Não">
+                                        Não</label>
+                                    <label class="radio-label"><input type="radio" name="inst_vent_surg" value="Sim">
+                                        Sim</label>
+                                </div>
+                            </div>
+                            <div class="instability-item">
+                                <label>Dor Forte</label>
+                                <div class="radio-group-horizontal">
+                                    <label class="radio-label"><input type="radio" name="inst_dor_surg" value="Não">
+                                        Não</label>
+                                    <label class="radio-label"><input type="radio" name="inst_dor_surg" value="Sim">
+                                        Sim</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <div class="action-bar">
                     <button type="button" class="btn btn-secondary" onclick="resetForm()">Limpar</button>
                     <button type="button" class="btn btn-primary" onclick="generateSummary()">Gerar Resumo</button>
@@ -622,7 +679,7 @@
     <div id="toastContainer" class="toast-container"></div>
     </div>
 
-    <script src="app.js?v=2.2"></script>
+    <script src="app.js?v=2.3"></script>
 </body>
 
 </html>

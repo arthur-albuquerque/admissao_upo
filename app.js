@@ -213,6 +213,15 @@ function generateClinicalSummary() {
 
     const leito = data.clin_leito || 'N/I';
     const hora = data.clin_hora || '--:--';
+    const rawDate = data.clin_data || '';
+
+    // Helper: Format Date dd/mm
+    const formatDate = (dateStr) => {
+        if (!dateStr) return '';
+        const [y, m, d] = dateStr.split('-');
+        return `${d}/${m}`;
+    };
+    const dateFormatted = formatDate(rawDate);
 
     // Instabilities
     const instStr = [
@@ -232,7 +241,7 @@ function generateClinicalSummary() {
     }
 
     const summary = `*ADMISSÃO CLÍNICA*\n` +
-        `Leito: ${leito} | Hora: ${hora}\n` +
+        `Data: ${dateFormatted} | Leito: ${leito} | Hora: ${hora}\n` +
         `—----------------------------------\n` +
         `INSTABILIDADE:\n${instStr}\n` +
         `—----------------------------------\n` +
@@ -255,8 +264,10 @@ document.addEventListener('DOMContentLoaded', () => {
     if (dataAdm) dataAdm.valueAsDate = now;
     if (horaAdm) horaAdm.value = now.toTimeString().slice(0, 5);
 
-    // Set default time for Clinical
+    // Set default values for Clinical
+    const clinData = document.getElementById('clin_data');
     const clinHora = document.getElementById('clin_hora');
+    if (clinData) clinData.valueAsDate = now;
     if (clinHora) clinHora.value = now.toTimeString().slice(0, 5);
 
     // Autosave Trigger: Debounced input listener
@@ -368,6 +379,7 @@ function generateSummary() {
 
     const data = {
         data: dateFormatted,
+        leito: getValue('leito_admissao'),
         hora: getValue('hora_admissao'),
         idade: getValue('idade'),
         sexo: getValue('sexo'),
@@ -418,17 +430,37 @@ function generateSummary() {
         heparina_data: getValue('heparina_data'),
         heparina_hora: getValue('heparina_hora'),
         compressor: document.querySelector('input[name="compressor"]:checked'),
-        deambular: getRadio('deambular')
+        deambular: getRadio('deambular'),
+
+        // Instability (Surgical)
+        inst_neuro: getRadio('inst_neuro_surg'),
+        inst_hemo: getRadio('inst_hemo_surg'),
+        inst_vent: getRadio('inst_vent_surg'),
+        inst_dor: getRadio('inst_dor_surg')
     };
 
     // --- BUILD TEXT ---
 
     // SECTION 1
     let section1 = `Nome,\n${data.idade} anos`;
+    if (data.leito) section1 += ` | Leito ${data.leito}`;
     if (data.peso) section1 += `\n${data.peso} kg`;
     if (data.altura) section1 += `\n${data.altura} m`;
     if (data.imc && data.imc !== '-') section1 += `\nIMC ${data.imc}`;
     section1 += `\n\nMA: ${data.equipe}\n\n—---------------------------------`;
+
+
+    // Instability String
+    const instStr = [
+        `Neurológica: ${data.inst_neuro || '-'}`,
+        `Hemodinâmica: ${data.inst_hemo || '-'}`,
+        `Ventilatória: ${data.inst_vent || '-'}`,
+        `Dor Forte: ${data.inst_dor || '-'}`
+    ].join(' | ');
+
+    // (Existing building logic for sections...)
+    // I need to make sure I don't break the existing code flow.
+    // Let's refactor the final assembly.
 
     // Antibiotic
     let antibioticLine = data.atb_nome ? `${data.data} ${data.atb_nome}` : '';
@@ -540,7 +572,7 @@ ${walkCheck} deambular em 12h
 (  ) Parametrização na prescrição 
 (  ) Check Prontuario fisico`;
 
-    let summary = `${section1}\n\n\n\n${section2}\n\n\n${section3}`;
+    let summary = `${section1}\n\n\n\n${section2}\n\n\nINSTABILIDADE:\n${instStr}\n\n\n${section3}`;
 
     document.getElementById('summaryText').textContent = summary.trim();
     document.getElementById('summaryModal').classList.add('open');
@@ -586,9 +618,11 @@ function resetForm(formId = 'admissionForm') {
         if (formId === 'admissionForm') {
             document.getElementById('data_admissao').valueAsDate = now;
             document.getElementById('hora_admissao').value = now.toTimeString().slice(0, 5);
+            // leito_admissao is text, so form.reset() handles it. 
             document.getElementById('alergia_detalhe').disabled = false;
             calculateBMI();
         } else if (formId === 'clinicalForm') {
+            document.getElementById('clin_data').valueAsDate = now;
             document.getElementById('clin_hora').value = now.toTimeString().slice(0, 5);
             document.getElementById('vad_selection').classList.add('hidden');
         }
