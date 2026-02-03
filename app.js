@@ -324,8 +324,7 @@ function generateClinicalSummary() {
     };
     const dateFormatted = formatDate(rawDate);
 
-    // Instabilities - New Format
-    const instLines = [];
+    // Instability String - Logic Grouping
     const formatInst = (val, label) => {
         if (val === 'Não') {
             if (label.toLowerCase() === 'dor forte') return `+ Sem dor forte`;
@@ -335,16 +334,30 @@ function generateClinicalSummary() {
             if (label.toLowerCase() === 'dor forte') return `- Dor forte`;
             return `- Instabilidade ${label.toLowerCase()}`;
         }
-        return `? ${label}: -`;
+        return null;
     };
 
-    instLines.push(formatInst(data.inst_neuro, 'Neurológica'));
-    instLines.push(formatInst(data.inst_vent, 'Ventilatória'));
-    instLines.push('');
-    instLines.push(formatInst(data.inst_hemo, 'Hemodinâmica'));
-    instLines.push(formatInst(data.inst_dor, 'Dor forte'));
+    const positives = [];
+    const negatives = [];
 
-    const instStr = instLines.join('\n');
+    const items = [
+        { val: data.inst_hemo, label: 'Hemodinâmica' },
+        { val: data.inst_neuro, label: 'Neurológica' },
+        { val: data.inst_vent, label: 'Ventilatória' },
+        { val: data.inst_dor, label: 'Dor forte' }
+    ];
+
+    items.forEach(item => {
+        const res = formatInst(item.val, item.label);
+        if (res) {
+            if (res.startsWith('+')) positives.push(res);
+            else negatives.push(res);
+        }
+    });
+
+    let instStr = positives.join('\n');
+    if (positives.length > 0 && negatives.length > 0) instStr += '\n\n';
+    instStr += negatives.join('\n');
 
     // Invasions
     let invList = Array.isArray(data.clin_invasao) ? data.clin_invasao : (data.clin_invasao ? [data.clin_invasao] : []);
@@ -730,7 +743,7 @@ ${walkCheck.replace('(x)', '(x)').replace('( )', '( )')} deambular em 12h
 ( ) Parametrização na prescrição 
 ( ) Check Prontuario fisico`;
 
-    let summary = `${section1}\n\n\n${section2}\n\n\n\nINSTABILIDADES:\n\n\n${instStr}\n\n\n\nOrientações:\n${section3}`;
+    let summary = `${section1}\n\n\n${section2}\n\n\n${instStr}\n\n\nOrientações:\n${section3}`;
 
     document.getElementById('summaryText').textContent = summary.trim();
     document.getElementById('summaryModal').classList.add('open');
