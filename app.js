@@ -222,15 +222,6 @@ function showToast(message, type = 'success') {
     }, 3000);
 }
 
-// --- Offline Detector ---
-function updateOnlineStatus() {
-    const badge = document.getElementById('offlineBadge');
-    if (navigator.onLine) {
-        badge.classList.remove('visible');
-    } else {
-        badge.classList.add('visible');
-    }
-}
 
 // --- Initialize ---
 // --- View Navigation ---
@@ -446,10 +437,8 @@ document.addEventListener('DOMContentLoaded', () => {
         if (f) f.addEventListener('input', saveHandler);
     });
 
-    // Network Listeners
-    window.addEventListener('online', updateOnlineStatus);
-    window.addEventListener('offline', updateOnlineStatus);
-    updateOnlineStatus(); // Check on load
+    // Network Listeners - Removed as it gives false positives on mobile
+    // and the app works fully offline using LocalStorage anyway.
 
     // Safety: Save immediately when closing/hiding the app
     window.addEventListener('visibilitychange', () => {
