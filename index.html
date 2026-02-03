@@ -14,7 +14,7 @@
     <link rel="apple-touch-icon" href="icon-192.png">
 
     <title>Admissão UPO</title>
-    <link rel="stylesheet" href="style.css?v=2.8">
+    <link rel="stylesheet" href="style.css?v=2.9">
 
     <!-- Register Service Worker -->
     <script>
@@ -156,9 +156,11 @@
                         <div class="checkbox-group">
                             <label class="checkbox-label"><input type="checkbox" name="clin_invasao" value="AVP">
                                 AVP</label>
-                            <label class="checkbox-label"><input type="checkbox" name="clin_invasao" value="PVP">
+                            <label class="checkbox-label"><input type="checkbox" id="check_pvp" name="clin_invasao"
+                                    value="PVP" onchange="toggleClinPVP(this)">
                                 PVP</label>
-                            <label class="checkbox-label"><input type="checkbox" name="clin_invasao" value="PAM">
+                            <label class="checkbox-label"><input type="checkbox" id="check_pam" name="clin_invasao"
+                                    value="PAM" onchange="toggleClinPAM(this)">
                                 PAM</label>
                             <label class="checkbox-label"><input type="checkbox" name="clin_invasao" value="CVD">
                                 CVD</label>
@@ -168,6 +170,16 @@
                             </label>
                             <label class="checkbox-label"><input type="checkbox" name="clin_invasao" value="Dreno">
                                 Dreno</label>
+                        </div>
+
+                        <!-- Details (Hidden by default) -->
+                        <div id="clin_pvp_detail" class="form-group hidden mt-2">
+                            <label>Onde? (PVP)</label>
+                            <input type="text" id="clin_pvp_loc" name="clin_pvp_loc" placeholder="Ex: Cefálica Dir">
+                        </div>
+                        <div id="clin_pam_detail" class="form-group hidden mt-2">
+                            <label>Onde? (PAM)</label>
+                            <input type="text" id="clin_pam_loc" name="clin_pam_loc" placeholder="Ex: Radial Esq">
                         </div>
 
                         <!-- VAD Option (Hidden by default) -->
@@ -677,7 +689,7 @@
     <div id="toastContainer" class="toast-container"></div>
     </div>
 
-    <script src="app.js?v=2.8"></script>
+    <script src="app.js?v=2.9"></script>
 </body>
 
 </html>

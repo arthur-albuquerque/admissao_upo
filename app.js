@@ -29,11 +29,15 @@ function saveToLocal() {
     const negaAlergia = document.getElementById('nega_alergia');
     const imcDisplay = document.getElementById('imc_display');
     const checkTot = document.getElementById('check_tot');
+    const checkPvp = document.getElementById('check_pvp');
+    const checkPam = document.getElementById('check_pam');
 
     if (checkClexane) data._ui_clexane = checkClexane.checked;
     if (negaAlergia) data._ui_nega_alergia = negaAlergia.checked;
     if (imcDisplay) data._ui_imc = imcDisplay.textContent;
     if (checkTot) data._ui_tot = checkTot.checked;
+    if (checkPvp) data._ui_pvp = checkPvp.checked;
+    if (checkPam) data._ui_pam = checkPam.checked;
 
     data._last_saved = new Date().toISOString();
 
@@ -106,6 +110,20 @@ function loadFromLocal() {
                 toggleVAD(el);
             }
         }
+        if (data._ui_pvp) {
+            const el = document.getElementById('check_pvp');
+            if (el) {
+                el.checked = true;
+                toggleClinPVP(el);
+            }
+        }
+        if (data._ui_pam) {
+            const el = document.getElementById('check_pam');
+            if (el) {
+                el.checked = true;
+                toggleClinPAM(el);
+            }
+        }
 
     } catch (e) {
         console.error('Error loading save', e);
@@ -122,7 +140,29 @@ function toggleVAD(checkbox) {
         document.getElementsByName('clin_vad').forEach(r => r.checked = false);
     }
 }
+
+function toggleClinPVP(checkbox) {
+    const div = document.getElementById('clin_pvp_detail');
+    if (checkbox.checked) {
+        div.classList.remove('hidden');
+    } else {
+        div.classList.add('hidden');
+        document.getElementById('clin_pvp_loc').value = '';
+    }
+}
+
+function toggleClinPAM(checkbox) {
+    const div = document.getElementById('clin_pam_detail');
+    if (checkbox.checked) {
+        div.classList.remove('hidden');
+    } else {
+        div.classList.add('hidden');
+        document.getElementById('clin_pam_loc').value = '';
+    }
+}
 window.toggleVAD = toggleVAD;
+window.toggleClinPVP = toggleClinPVP;
+window.toggleClinPAM = toggleClinPAM;
 
 // --- Toast System ---
 function showToast(message, type = 'success') {
@@ -232,12 +272,23 @@ function generateClinicalSummary() {
 
     // Invasions
     let invList = Array.isArray(data.clin_invasao) ? data.clin_invasao : (data.clin_invasao ? [data.clin_invasao] : []);
-    let invStr = invList.join(', ') || 'Nenhuma';
 
-    if (invList.includes('TOT')) {
-        const vad = data.clin_vad || 'Não informado';
-        invStr += ` (VAD: ${vad})`;
-    }
+    // Build detail strings
+    let invasionStrings = [];
+    invList.forEach(inv => {
+        let text = inv;
+        if (inv === 'TOT') {
+            const vad = data.clin_vad || 'Não inf.';
+            text += ` (VAD: ${vad})`;
+        } else if (inv === 'PVP' && data.clin_pvp_loc) {
+            text += ` (${data.clin_pvp_loc})`;
+        } else if (inv === 'PAM' && data.clin_pam_loc) {
+            text += ` (${data.clin_pam_loc})`;
+        }
+        invasionStrings.push(text);
+    });
+
+    let invStr = invasionStrings.join(', ') || 'Nenhuma';
 
     const summary = `*ADMISSÃO CLÍNICA*\n` +
         `Data: ${dateFormatted} | Leito: ${leito} | Hora: ${hora}\n` +
@@ -624,6 +675,8 @@ function resetForm(formId = 'admissionForm') {
             document.getElementById('clin_data').valueAsDate = now;
             document.getElementById('clin_hora').value = now.toTimeString().slice(0, 5);
             document.getElementById('vad_selection').classList.add('hidden');
+            document.getElementById('clin_pvp_detail').classList.add('hidden');
+            document.getElementById('clin_pam_detail').classList.add('hidden');
         }
 
         showToast('Formulário limpo', 'success');
