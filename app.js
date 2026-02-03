@@ -563,7 +563,15 @@ function copyAndOpenDontpad() {
     const text = document.getElementById('summaryText').textContent;
     navigator.clipboard.writeText(text).then(() => {
         showToast('Copiado! Abrindo Dontpad...', 'success');
-        window.open('http://dontpad.com/admissao_upo_cirurgica', '_blank');
+
+        let url = 'http://dontpad.com/admissao_upo_cirurgica';
+        const isClinical = !document.getElementById('view-clinical').classList.contains('hidden');
+
+        if (isClinical) {
+            url = 'http://dontpad.com/admissao_upo_clinica';
+        }
+
+        window.open(url, '_blank');
     });
 }
 
