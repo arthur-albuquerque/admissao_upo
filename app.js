@@ -141,6 +141,17 @@ document.addEventListener('DOMContentLoaded', () => {
     window.addEventListener('online', updateOnlineStatus);
     window.addEventListener('offline', updateOnlineStatus);
     updateOnlineStatus(); // Check on load
+
+    // Safety: Save immediately when closing/hiding the app
+    window.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'hidden') {
+            saveToLocal();
+        }
+    });
+    // Extra safety for iOS
+    window.addEventListener('pagehide', () => {
+        saveToLocal();
+    });
 });
 
 // UI: Expand/Collapse Sections
