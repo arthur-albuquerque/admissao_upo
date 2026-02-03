@@ -316,7 +316,10 @@ function generateClinicalSummary() {
     // Instabilities - New Format
     const instLines = [];
     const formatInst = (val, label) => {
-        if (val === 'Não') return `+ ${label} ok`;
+        if (val === 'Não') {
+            if (label.toLowerCase() === 'dor forte') return `+ Sem dor forte`;
+            return `+ ${label} ok`;
+        }
         if (val === 'Sim') {
             if (label.toLowerCase() === 'dor forte') return `- Dor forte`;
             return `- Instabilidade ${label.toLowerCase()}`;
@@ -566,7 +569,10 @@ function generateSummary() {
     const negatives = [];
 
     const formatInst = (val, label) => {
-        if (val === 'Não') return `+ ${label} ok`;
+        if (val === 'Não') {
+            if (label.toLowerCase() === 'dor forte') return `+ Sem dor forte`;
+            return `+ ${label} ok`;
+        }
         if (val === 'Sim') {
             if (label.toLowerCase() === 'dor forte') return `- Dor forte`;
             return `- Instabilidade ${label.toLowerCase()}`;
