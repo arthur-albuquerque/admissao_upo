@@ -14,7 +14,7 @@
     <link rel="apple-touch-icon" href="icon-192.png">
 
     <title>Admissão UPO</title>
-    <link rel="stylesheet" href="style.css?v=4.8">
+    <link rel="stylesheet" href="style.css?v=4.9">
 
     <!-- Register Service Worker -->
     <script>
@@ -680,7 +680,8 @@
             <pre class="modal-body" id="summaryText"></pre>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" onclick="closeModal()">Fechar</button>
-                <button type="button" class="btn btn-secondary" onclick="generateCalendarEvent()"
+                <button type="button" id="reminderButton" class="btn btn-secondary hidden"
+                    onclick="generateCalendarEvent()"
                     style="background-color: #f59e0b; color: white; border: none;">Criar Lembrete</button>
                 <button type="button" class="btn btn-primary" onclick="copyToClipboard()">Copiar Texto</button>
                 <button type="button" id="btnDontpad" class="btn btn-secondary"
@@ -697,7 +698,7 @@
     <div id="toastContainer" class="toast-container"></div>
     </div>
 
-    <script src="app.js?v=4.8"></script>
+    <script src="app.js?v=4.9"></script>
 </body>
 
 </html>

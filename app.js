@@ -386,6 +386,14 @@ function generateClinicalSummary() {
     const summary = `${leito}\n\n\n${instStr}\n\n\n${invStr}`;
 
     document.getElementById('summaryText').textContent = summary.trim();
+
+    // Show/Hide Reminder Button based on instabilities
+    const reminderBtn = document.getElementById('reminderButton');
+    if (reminderBtn) {
+        if (negatives.length > 0) reminderBtn.classList.remove('hidden');
+        else reminderBtn.classList.add('hidden');
+    }
+
     document.getElementById('summaryModal').classList.add('open');
 }
 window.generateClinicalSummary = generateClinicalSummary;
@@ -744,6 +752,14 @@ ${walkCheck.replace('(x)', '(x)').replace('( )', '( )')} deambular em 12h
     let summary = `${section1}\n\n\n${section2}\n\n\n${instStr}\n\n\nOrientações:\n${section3}`;
 
     document.getElementById('summaryText').textContent = summary.trim();
+
+    // Show/Hide Reminder Button based on instabilities
+    const reminderBtn = document.getElementById('reminderButton');
+    if (reminderBtn) {
+        if (negatives.length > 0) reminderBtn.classList.remove('hidden');
+        else reminderBtn.classList.add('hidden');
+    }
+
     document.getElementById('summaryModal').classList.add('open');
 }
 
@@ -804,11 +820,14 @@ function resetForm(formId = 'admissionForm') {
 
 // Logic: Calendar Export
 function generateCalendarEvent() {
-    const hours = prompt("Daqui a quantas horas você quer ser lembrado?", "2");
-    if (!hours) return;
+    const minutesInput = prompt("Daqui a quantos minutos você quer ser lembrado?", "30");
+    if (!minutesInput) return;
+
+    const minutes = parseFloat(minutesInput);
+    if (isNaN(minutes)) return;
 
     const now = new Date();
-    const startDate = new Date(now.getTime() + (parseFloat(hours) * 60 * 60 * 1000));
+    const startDate = new Date(now.getTime() + (minutes * 60 * 1000));
     const endDate = new Date(startDate.getTime() + (30 * 60 * 1000));
 
     const formatDate = (date) => {
