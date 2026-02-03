@@ -14,7 +14,7 @@
     <link rel="apple-touch-icon" href="icon-192.png">
 
     <title>Admissão UPO</title>
-    <link rel="stylesheet" href="style.css?v=6.0">
+    <link rel="stylesheet" href="style.css?v=6.1">
 
     <!-- Register Service Worker -->
     <script>
@@ -252,36 +252,44 @@
                             <div class="instability-item">
                                 <label>Neurológica</label>
                                 <div class="radio-group-horizontal">
-                                    <label class="radio-label"><input type="radio" name="reav_inst_neuro" value="Não">
+                                    <label class="radio-label"><input type="radio" name="reav_inst_neuro" value="Não"
+                                            onchange="checkReavStatus()">
                                         Não</label>
-                                    <label class="radio-label"><input type="radio" name="reav_inst_neuro" value="Sim">
+                                    <label class="radio-label"><input type="radio" name="reav_inst_neuro" value="Sim"
+                                            onchange="checkReavStatus()">
                                         Sim</label>
                                 </div>
                             </div>
                             <div class="instability-item">
                                 <label>Hemodinâmica</label>
                                 <div class="radio-group-horizontal">
-                                    <label class="radio-label"><input type="radio" name="reav_inst_hemo" value="Não">
+                                    <label class="radio-label"><input type="radio" name="reav_inst_hemo" value="Não"
+                                            onchange="checkReavStatus()">
                                         Não</label>
-                                    <label class="radio-label"><input type="radio" name="reav_inst_hemo" value="Sim">
+                                    <label class="radio-label"><input type="radio" name="reav_inst_hemo" value="Sim"
+                                            onchange="checkReavStatus()">
                                         Sim</label>
                                 </div>
                             </div>
                             <div class="instability-item">
                                 <label>Ventilatória</label>
                                 <div class="radio-group-horizontal">
-                                    <label class="radio-label"><input type="radio" name="reav_inst_vent" value="Não">
+                                    <label class="radio-label"><input type="radio" name="reav_inst_vent" value="Não"
+                                            onchange="checkReavStatus()">
                                         Não</label>
-                                    <label class="radio-label"><input type="radio" name="reav_inst_vent" value="Sim">
+                                    <label class="radio-label"><input type="radio" name="reav_inst_vent" value="Sim"
+                                            onchange="checkReavStatus()">
                                         Sim</label>
                                 </div>
                             </div>
                             <div class="instability-item">
                                 <label>Dor Forte</label>
                                 <div class="radio-group-horizontal">
-                                    <label class="radio-label"><input type="radio" name="reav_inst_dor" value="Não">
+                                    <label class="radio-label"><input type="radio" name="reav_inst_dor" value="Não"
+                                            onchange="checkReavStatus()">
                                         Não</label>
-                                    <label class="radio-label"><input type="radio" name="reav_inst_dor" value="Sim">
+                                    <label class="radio-label"><input type="radio" name="reav_inst_dor" value="Sim"
+                                            onchange="checkReavStatus()">
                                         Sim</label>
                                 </div>
                             </div>
@@ -292,8 +300,10 @@
                 <div class="action-bar" style="position: static; margin-top: 24px;">
                     <button type="button" class="btn btn-secondary"
                         onclick="resetForm('reavaliacaoForm')">Limpar</button>
-                    <!-- Check button -->
-                    <button type="button" class="btn btn-primary" onclick="checkReavaliacao()">Checar</button>
+                    <!-- Check button dynamic -->
+                    <button type="button" id="btnReavReminder" class="btn btn-primary hidden"
+                        style="background-color: #f59e0b; border: none;" onclick="openReavReminder()">Criar
+                        Lembrete</button>
                 </div>
             </form>
         </div>
@@ -775,7 +785,8 @@
                 <button type="button" id="reminderButton" class="btn btn-secondary hidden"
                     onclick="generateCalendarEvent()"
                     style="background-color: #f59e0b; color: white; border: none;">Criar Lembrete</button>
-                <button type="button" class="btn btn-primary" onclick="copyToClipboard()">Copiar Texto</button>
+                <button type="button" id="btnModalCopy" class="btn btn-primary" onclick="copyToClipboard()">Copiar
+                    Texto</button>
                 <button type="button" id="btnDontpad" class="btn btn-secondary"
                     style="background-color: #3b82f6; color: white; border: none;" onclick="copyAndOpenDontpad()">Colar
                     no Dontpad</button>
@@ -805,7 +816,7 @@
     <div id="toastContainer" class="toast-container"></div>
     </div>
 
-    <script src="app.js?v=6.0"></script>
+    <script src="app.js?v=6.1"></script>
 </body>
 
 </html>

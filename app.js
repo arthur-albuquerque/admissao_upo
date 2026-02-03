@@ -485,6 +485,14 @@ Orientações:
     const reminderContent = `Leito: ${leito}\n\n${negatives.join('\n')}`;
     document.getElementById('summaryModal').dataset.reminderContent = reminderContent;
 
+    // Reset Modal Buttons (Show all by default for standard summaries)
+    const btnCopy = document.getElementById('btnModalCopy');
+    const btnDontpad = document.getElementById('btnDontpad');
+    if (btnCopy) btnCopy.classList.remove('hidden');
+    if (btnDontpad) {
+        btnDontpad.classList.remove('hidden');
+    }
+
     // Show/Hide Reminder Button based on instabilities
     const reminderBtn = document.getElementById('reminderButton');
     if (reminderBtn) {
@@ -860,6 +868,12 @@ ${walkCheck.replace('(x)', '(x)').replace('( )', '( )')} liberado para deambular
     const reminderContentSurg = `Leito: ${leitoVal}\n\n${negatives.join('\n')}`;
     document.getElementById('summaryModal').dataset.reminderContent = reminderContentSurg;
 
+    // Reset Modal Buttons (Show all by default for standard summaries)
+    const btnCopy = document.getElementById('btnModalCopy');
+    const btnDontpad = document.getElementById('btnDontpad');
+    if (btnCopy) btnCopy.classList.remove('hidden');
+    if (btnDontpad) btnDontpad.classList.remove('hidden');
+
     // Show/Hide Reminder Button based on instabilities
     const reminderBtn = document.getElementById('reminderButton');
     if (reminderBtn) {
@@ -1023,3 +1037,129 @@ function checkReavaliacao() {
     }
 }
 window.checkReavaliacao = checkReavaliacao;
+
+// Logic: Check Reavaliacao Status (Show/Hide Reminder Button in Form)
+function checkReavStatus() {
+    const getRadio = (name) => document.querySelector(`input[name="${name}"]:checked`)?.value;
+    const items = ['reav_inst_neuro', 'reav_inst_hemo', 'reav_inst_vent', 'reav_inst_dor'];
+
+    let hasInstability = false;
+    items.forEach(name => {
+        if (getRadio(name) === 'Sim') hasInstability = true;
+    });
+
+    const btn = document.getElementById('btnReavReminder');
+    if (btn) {
+        if (hasInstability) btn.classList.remove('hidden');
+        else btn.classList.add('hidden');
+    }
+}
+window.checkReavStatus = checkReavStatus;
+
+// Logic: Open Reavaliacao Reminder Modal
+function openReavReminder() {
+    const getValue = (id) => document.getElementById(id)?.value || 'N/I';
+    const getRadio = (name) => document.querySelector(`input[name="${name}"]:checked`)?.value || 'Não';
+
+    const leito = getValue('reav_leito');
+
+    // Instability Logic
+    const negatives = [];
+
+    const formatInst = (val, label) => {
+        if (val === 'Sim') return `- Instabilidade ${label.toLowerCase()}`;
+        return null;
+    };
+
+    const instItems = [
+        { val: getRadio('reav_inst_neuro'), label: 'Neurológica' },
+        { val: getRadio('reav_inst_hemo'), label: 'Hemodinâmica' },
+        { val: getRadio('reav_inst_vent'), label: 'Ventilatória' },
+        { val: getRadio('reav_inst_dor'), label: 'Dor forte' }
+    ];
+
+    instItems.forEach(item => {
+        const res = formatInst(item.val, item.label);
+        if (res) negatives.push(res);
+    });
+
+    const summary = `Leito: ${leito}\n\n${negatives.join('\n')}`;
+    document.getElementById('summaryText').textContent = summary.trim();
+    document.getElementById('summaryModal').dataset.reminderContent = summary.trim();
+
+    // HIDE Copy and Dontpad buttons
+    const btnCopy = document.getElementById('btnModalCopy');
+    const btnDontpad = document.getElementById('btnDontpad');
+    if (btnCopy) btnCopy.classList.add('hidden');
+    if (btnDontpad) btnDontpad.classList.add('hidden');
+
+    // Show Reminder Button (Force show since we only get here if there is instability)
+    const reminderBtn = document.getElementById('reminderButton');
+    if (reminderBtn) reminderBtn.classList.remove('hidden');
+
+    document.getElementById('summaryModal').classList.add('open');
+}
+window.openReavReminder = openReavReminder;
+
+// Logic: Check Reavaliacao Status (Show/Hide Reminder Button in Form)
+function checkReavStatus() {
+    const getRadio = (name) => document.querySelector(`input[name="${name}"]:checked`)?.value;
+    const items = ['reav_inst_neuro', 'reav_inst_hemo', 'reav_inst_vent', 'reav_inst_dor'];
+
+    let hasInstability = false;
+    items.forEach(name => {
+        if (getRadio(name) === 'Sim') hasInstability = true;
+    });
+
+    const btn = document.getElementById('btnReavReminder');
+    if (btn) {
+        if (hasInstability) btn.classList.remove('hidden');
+        else btn.classList.add('hidden');
+    }
+}
+window.checkReavStatus = checkReavStatus;
+
+// Logic: Open Reavaliacao Reminder Modal
+function openReavReminder() {
+    const getValue = (id) => document.getElementById(id)?.value || 'N/I';
+    const getRadio = (name) => document.querySelector(`input[name="${name}"]:checked`)?.value || 'Não';
+
+    const leito = getValue('reav_leito');
+
+    // Instability Logic
+    const negatives = [];
+
+    const formatInst = (val, label) => {
+        if (val === 'Sim') return `- Instabilidade ${label.toLowerCase()}`;
+        return null;
+    };
+
+    const instItems = [
+        { val: getRadio('reav_inst_neuro'), label: 'Neurológica' },
+        { val: getRadio('reav_inst_hemo'), label: 'Hemodinâmica' },
+        { val: getRadio('reav_inst_vent'), label: 'Ventilatória' },
+        { val: getRadio('reav_inst_dor'), label: 'Dor forte' }
+    ];
+
+    instItems.forEach(item => {
+        const res = formatInst(item.val, item.label);
+        if (res) negatives.push(res);
+    });
+
+    const summary = `Leito: ${leito}\n\n${negatives.join('\n')}`;
+    document.getElementById('summaryText').textContent = summary.trim();
+    document.getElementById('summaryModal').dataset.reminderContent = summary.trim();
+
+    // HIDE Copy and Dontpad buttons
+    const btnCopy = document.getElementById('btnModalCopy');
+    const btnDontpad = document.getElementById('btnDontpad');
+    if (btnCopy) btnCopy.classList.add('hidden');
+    if (btnDontpad) btnDontpad.classList.add('hidden');
+
+    // Show Reminder Button (Force show since we only get here if there is instability)
+    const reminderBtn = document.getElementById('reminderButton');
+    if (reminderBtn) reminderBtn.classList.remove('hidden');
+
+    document.getElementById('summaryModal').classList.add('open');
+}
+window.openReavReminder = openReavReminder;
