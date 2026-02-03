@@ -643,3 +643,23 @@ textarea.auto-grow {
     flex-direction: row;
   }
 }
+
+@keyframes pulse-error {
+  0% {
+    border-color: var(--border-color);
+  }
+
+  50% {
+    border-color: var(--danger-color);
+    box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+  }
+
+  100% {
+    border-color: var(--border-color);
+  }
+}
+
+.highlight-error {
+  animation: pulse-error 1s ease 3;
+  border-color: var(--danger-color) !important;
+}

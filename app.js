@@ -250,6 +250,35 @@ function generateClinicalSummary() {
         }
     }
 
+    // Validation: "Há Instabilidade?"
+    const instabilityFields = [
+        { name: 'inst_neuro', label: 'Neurológica' },
+        { name: 'inst_hemo', label: 'Hemodinâmica' },
+        { name: 'inst_vent', label: 'Ventilatória' },
+        { name: 'inst_dor', label: 'Dor Forte' }
+    ];
+
+    let missing = [];
+    instabilityFields.forEach(field => {
+        if (!data[field.name]) {
+            missing.push(field.label);
+            // Highlight the item
+            const radios = document.getElementsByName(field.name);
+            if (radios.length > 0) {
+                const container = radios[0].closest('.instability-item');
+                if (container) {
+                    container.classList.add('highlight-error');
+                    setTimeout(() => container.classList.remove('highlight-error'), 3000);
+                }
+            }
+        }
+    });
+
+    if (missing.length > 0) {
+        showToast(`Preencha Instabilidade: ${missing.join(', ')}`, 'warning');
+        return;
+    }
+
     const leito = data.clin_leito || 'N/I';
     const hora = data.clin_hora || '--:--';
     const rawDate = data.clin_data || '';
