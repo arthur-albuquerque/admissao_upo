@@ -119,16 +119,58 @@ function updateOnlineStatus() {
 }
 
 // --- Initialize ---
+// --- View Navigation ---
+function navigateTo(viewId) {
+    document.querySelectorAll('.view').forEach(el => {
+        el.classList.add('hidden');
+    });
+    const target = document.getElementById(viewId);
+    if (target) {
+        target.classList.remove('hidden');
+    }
+    window.scrollTo(0, 0);
+}
+
+function resumeSession() {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) {
+        // We have data! Go to surgical view and load it.
+        // In the future, we might check a 'type' field in the JSON to decide which view to open.
+        // For now, it's always Surgical.
+        navigateTo('view-surgical');
+        loadFromLocal();
+        showToast('Sessão restaurada', 'success');
+    } else {
+        showToast('Nenhum rascunho encontrado', 'warning');
+    }
+}
+
+// Make globally available for HTML onclicks
+window.navigateTo = navigateTo;
+window.resumeSession = resumeSession;
+
+// --- Initialization ---
 document.addEventListener('DOMContentLoaded', () => {
+    // Default to Home View
+    navigateTo('view-home');
+
     // Set default date/time to now if empty (loadFromLocal might overwrite)
     const now = new Date();
     document.getElementById('data_admissao').valueAsDate = now;
     document.getElementById('hora_admissao').value = now.toTimeString().slice(0, 5);
 
-    // Try to load saved data
-    loadFromLocal();
-    // After load, ensure BMI is calculated if fields are present
-    calculateBMI();
+    // Note: We do NOT auto-loadFromLocal() anymore on page load.
+    // The user must click "Abrir Anterior" or "Admissão Cirúrgica" (which could start fresh).
+    // Actually, "Admissão Cirúrgica" button just goes to view. Use logic below:
+
+    // If user clicks "Sirúrgica" button, we might want to CLEAR previous data or KEEP it?
+    // "Abrir Anterior" implies resuming. "Admissão Cirúrgica" implies new?
+    // Let's make "Admissão Cirúrgica" start fresh by default? Or keep draft?
+    // User requested "Abrir Anterior" specifically. 
+    // So "Admissão Cirúrgica" should arguably behave like "New".
+    // But for safety, we won't auto-clear unless they explicitly hit "Limpar".
+    // effectively, clicking "Cirurgica" takes you to the form. If there was data there, it's there.
+    // Let's treat "Abrir Anterior" as "Go to form AND ensure data is loaded".
 
     // Autosave Trigger: Debounced input listener
     let timeout;

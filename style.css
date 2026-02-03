@@ -473,3 +473,106 @@ textarea.auto-grow {
     opacity: 1;
   }
 }
+/* --- Single Page App / Dashboard Styles --- */
+
+.view {
+    transition: opacity 0.3s ease, transform 0.3s ease;
+    animation: fadeIn 0.4s ease-out;
+}
+
+.view.hidden {
+    display: none;
+}
+
+/* Dashboard Grid */
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 16px;
+    margin-top: 24px;
+}
+
+/* Dashboard Cards */
+.dashboard-card {
+    background: var(--surface-color);
+    border-radius: var(--radius-md);
+    padding: 24px 16px;
+    text-align: center;
+    cursor: pointer;
+    border: 1px solid var(--border-color);
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+
+    /* Flex center content */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 160px;
+}
+
+.dashboard-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+    border-color: var(--primary-color);
+}
+
+.dashboard-card:active {
+    transform: scale(0.98);
+}
+
+.dashboard-card.primary {
+    background: linear-gradient(135deg, var(--primary-color), var(--primary-hover));
+    color: white;
+    border: none;
+}
+.dashboard-card.primary h3, 
+.dashboard-card.primary p {
+    color: white;
+}
+
+.dashboard-card.secondary {
+    border-color: var(--secondary-color);
+    background: rgba(147, 51, 234, 0.05); /* Tint of secondary */
+}
+
+.card-icon {
+    font-size: 2.5rem;
+    margin-bottom: 12px;
+}
+
+.dashboard-card h3 {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: var(--text-color);
+}
+
+.dashboard-card p {
+    font-size: 0.85rem;
+    color: var(--text-light);
+    line-height: 1.3;
+}
+
+/* Back Button */
+.btn-back {
+    background: none;
+    border: none;
+    color: var(--primary-color);
+    font-weight: 600;
+    cursor: pointer;
+    margin-bottom: 16px;
+    padding: 8px 0;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+.btn-back:hover {
+    text-decoration: underline;
+}
+
+/* Animations */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
