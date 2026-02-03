@@ -160,6 +160,16 @@ function toggleClinPAM(checkbox) {
         document.getElementById('clin_pam_loc').value = '';
     }
 }
+
+function toggleClinDreno(checkbox) {
+    const div = document.getElementById('clin_dreno_detail');
+    if (checkbox.checked) {
+        div.classList.remove('hidden');
+    } else {
+        div.classList.add('hidden');
+        document.getElementById('clin_dreno_loc').value = '';
+    }
+}
 function toggleSurgPVP(checkbox) {
     const el = document.getElementById('inv_pvp_loc');
     if (checkbox.checked) {
@@ -183,6 +193,7 @@ function toggleSurgPAM(checkbox) {
 window.toggleVAD = toggleVAD;
 window.toggleClinPVP = toggleClinPVP;
 window.toggleClinPAM = toggleClinPAM;
+window.toggleClinDreno = toggleClinDreno;
 window.toggleSurgPVP = toggleSurgPVP;
 window.toggleSurgPAM = toggleSurgPAM;
 
@@ -349,6 +360,8 @@ function generateClinicalSummary() {
             text += ` ${data.clin_pvp_loc}`;
         } else if (inv === 'PAM' && data.clin_pam_loc) {
             text += ` ${data.clin_pam_loc}`;
+        } else if (inv === 'Dreno' && data.clin_dreno_loc) {
+            text += ` ${data.clin_dreno_loc}`;
         }
         // Prepend date to each invasion
         const itemWithDate = dateFormatted ? `${dateFormatted} ${text}` : text;

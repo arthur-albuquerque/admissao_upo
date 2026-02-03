@@ -1,4 +1,4 @@
-const CACHE_NAME = 'upo-app-v25';
+const CACHE_NAME = 'upo-app-v26';
 const ASSETS_TO_CACHE = [
     './',
     './index.html',

@@ -14,7 +14,7 @@
     <link rel="apple-touch-icon" href="icon-192.png">
 
     <title>Admissão UPO</title>
-    <link rel="stylesheet" href="style.css?v=4.4">
+    <link rel="stylesheet" href="style.css?v=4.5">
 
     <!-- Register Service Worker -->
     <script>
@@ -168,7 +168,8 @@
                                 <input type="checkbox" id="check_tot" name="clin_invasao" value="TOT"
                                     onchange="toggleVAD(this)"> TOT
                             </label>
-                            <label class="checkbox-label"><input type="checkbox" name="clin_invasao" value="Dreno">
+                            <label class="checkbox-label"><input type="checkbox" id="check_dreno" name="clin_invasao"
+                                    value="Dreno" onchange="toggleClinDreno(this)">
                                 Dreno</label>
                         </div>
 
@@ -180,6 +181,10 @@
                         <div id="clin_pam_detail" class="form-group hidden mt-2">
                             <label>Onde? (PAM)</label>
                             <input type="text" id="clin_pam_loc" name="clin_pam_loc" placeholder="Ex: AFD">
+                        </div>
+                        <div id="clin_dreno_detail" class="form-group hidden mt-2">
+                            <label>Onde? (Dreno)</label>
+                            <input type="text" id="clin_dreno_loc" name="clin_dreno_loc" placeholder="Onde?">
                         </div>
 
                         <!-- VAD Option (Hidden by default) -->
@@ -692,7 +697,7 @@
     <div id="toastContainer" class="toast-container"></div>
     </div>
 
-    <script src="app.js?v=4.4"></script>
+    <script src="app.js?v=4.5"></script>
 </body>
 
 </html>
