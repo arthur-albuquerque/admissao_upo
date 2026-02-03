@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- PWA Settings -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#0284c7">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="UPO">
+    <link rel="apple-touch-icon" href="icon-192.png">
+
+    <title>Admissão UPO</title>
+    <link rel="stylesheet" href="style.css">
+
+    <!-- Register Service Worker -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./sw.js')
+                    .then(reg => console.log('SW registered!', reg))
+                    .catch(err => console.log('SW failed', err));
+            });
+        }
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+
+<body>
+    <div class="container">
+        <header>
+            <h1>Admissão CTI Pós-Operatório</h1>
+            <p>Formulário de Passagem de Caso</p>
+        </header>
+
+        <form id="admissionForm">
+
+            <!-- 1. DADOS GERAIS -->
+            <div class="card">
+                <div class="section-header" onclick="toggleSection(this)">
+                    <span class="section-title">1. Dados Gerais</span>
+                    <span class="toggle-icon">▼</span>
+                </div>
+                <div class="section-content">
+                    <div class="grid-2">
+                        <div class="form-group">
+                            <label>Data</label>
+                            <input type="date" id="data_admissao" name="data_admissao">
+                        </div>
+                        <div class="form-group">
+                            <label>Hora</label>
+                            <input type="time" id="hora_admissao" name="hora_admissao">
+                        </div>
+                    </div>
+
+                    <div class="grid-3">
+                        <div class="form-group">
+                            <label>Idade</label>
+                            <input type="number" id="idade" name="idade" placeholder="Anos">
+                        </div>
+                        <div class="form-group">
+                            <label>Sexo</label>
+                            <select id="sexo" name="sexo">
+                                <option value="">Selec.</option>
+                                <option value="M">Masc</option>
+                                <option value="F">Fem</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="grid-3">
+                        <div class="form-group">
+                            <label>Peso (kg)</label>
+                            <input type="number" id="peso" name="peso" step="0.1" oninput="calculateBMI()">
+                        </div>
+                        <div class="form-group">
+                            <label>Altura (m)</label>
+                            <input type="number" id="altura" name="altura" step="0.01" placeholder="1.75"
+                                oninput="calculateBMI()">
+                        </div>
+                        <div class="form-group">
+                            <label>IMC</label>
+                            <div id="imc_display" class="result-badge">-</div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Alergias</label>
+                        <div class="checkbox-group">
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="nega_alergia" onchange="toggleAllergyInput(this)"> Nega
+                                Alergias
+                            </label>
+                        </div>
+                        <input type="text" id="alergia_detalhe" name="alergia_detalhe" placeholder="Se sim, quais?"
+                            class="mt-2">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Equipe Cirúrgica / Tel</label>
+                        <input type="text" id="equipe" name="equipe" placeholder="Nome da equipe / Contato">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Pós-operatório de:</label>
+                        <textarea id="cirurgia" name="cirurgia" rows="2" placeholder="Nome do procedimento"></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Informações Pré-Op / Cirurgias Prévias</label>
+                        <textarea id="info_pre_op" name="info_pre_op" rows="2"></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Comorbidades (Antecedentes)</label>
+                        <div class="checkbox-group">
+                            <label class="checkbox-label"><input type="checkbox" name="comorb" value="HAS"> HAS</label>
+                            <label class="checkbox-label"><input type="checkbox" name="comorb" value="Diabetes">
+                                Diabetes</label>
+                            <label class="checkbox-label"><input type="checkbox" name="comorb" value="DPOC">
+                                DPOC</label>
+                            <label class="checkbox-label"><input type="checkbox" name="comorb" value="Coronariopatia">
+                                Coronariopatia</label>
+                            <label class="checkbox-label"><input type="checkbox" name="comorb" value="ICC"> ICC</label>
+                            <label class="checkbox-label"><input type="checkbox" name="comorb" value="Tabagismo"
+                                    id="tabagismo" onchange="calculateApfel()"> Tabagismo</label>
+                            <label class="checkbox-label"><input type="checkbox" name="comorb" value="Etilismo">
+                                Etilismo</label>
+                            <label class="checkbox-label"><input type="checkbox" name="comorb" value="Hipotireoidismo">
+                                Hipotireoidismo</label>
+                        </div>
+                        <input type="text" name="comorb_outros" placeholder="Outros..." style="margin-top:8px;">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Medicações Habituais</label>
+                        <textarea id="meds_habituais" name="meds_habituais" rows="2"
+                            placeholder="Listar medicações em uso..."></textarea>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 2. PERI E PÓS OPERATÓRIAS -->
+            <div class="card">
+                <div class="section-header" onclick="toggleSection(this)">
+                    <span class="section-title">2. Peri e Pós-Op</span>
+                    <span class="toggle-icon">▼</span>
+                </div>
+                <div class="section-content">
+                    <div class="form-group">
+                        <label>Duração Cirurgia</label>
+                        <div class="grid-2">
+                            <input type="number" name="duracao_h" placeholder="Horas">
+                            <input type="number" name="duracao_min" placeholder="Min">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Via Aérea</label>
+                        <div class="grid-2">
+                            <div class="checkbox-group">
+                                <label class="radio-label"><input type="radio" name="vad" value="Não"> VAD: Não</label>
+                                <label class="radio-label"><input type="radio" name="vad" value="Sim"> VAD: Sim</label>
+                            </div>
+                            <input type="text" id="cormack" name="cormack" placeholder="Cormack (I-IV)">
+                        </div>
+
+                        <label style="margin-top:8px; display:block">Dispositivo de Intubação:</label>
+                        <div class="checkbox-group">
+                            <label class="radio-label"><input type="radio" name="disp_iot" value="Laringo Direta">
+                                Laringo Direta</label>
+                            <label class="radio-label"><input type="radio" name="disp_iot" value="Videolaringo">
+                                Videolaringo</label>
+                            <label class="checkbox-label"><input type="checkbox" name="bougie" value="Sim"> Usou
+                                Bougie?</label>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Antibioticoprofilaxia</label>
+                        <div class="grid-2">
+                            <input type="text" id="antibiotico" name="antibiotico" placeholder="Qual atb?">
+                            <input type="time" id="atb_hora" name="atb_hora" placeholder="Última dose">
+                        </div>
+                        <div class="checkbox-group" style="margin-top:8px">
+                            <label class="radio-label"><input type="radio" name="conduta_atb" value="Não continuar"> Não
+                                continuar</label>
+                            <label class="radio-label"><input type="radio" name="conduta_atb" value="Manter 24h"> Manter
+                                24h</label>
+                            <label class="radio-label"><input type="radio" name="conduta_atb" value="Terapêutico">
+                                Terapêutico</label>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Anestesia</label>
+                        <div class="checkbox-group">
+                            <label class="checkbox-label"><input type="checkbox" name="anestesia" value="Geral/Venosa">
+                                Geral/Venosa</label>
+                            <label class="checkbox-label"><input type="checkbox" name="anestesia" value="Inalatória">
+                                Inalatória</label>
+                            <label class="checkbox-label"><input type="checkbox" name="anestesia" value="Raqui">
+                                Raqui</label>
+                            <label class="checkbox-label"><input type="checkbox" name="anestesia" value="Sedação">
+                                Sedação</label>
+                            <label class="checkbox-label"><input type="checkbox" name="anestesia" value="Bloqueio">
+                                Bloqueio Perif.</label>
+                            <label class="checkbox-label"><input type="checkbox" name="anestesia" value="Peridural">
+                                Peridural</label>
+                        </div>
+                        <textarea name="anestesia_drogas" rows="2" placeholder="Drogas utilizadas..."
+                            style="margin-top:8px;"></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Medicações Saída de Sala</label>
+                        <div class="checkbox-group">
+                            <label class="checkbox-label"><input type="checkbox" name="sds_med" value="Dipirona">
+                                Dipirona</label>
+                            <label class="checkbox-label"><input type="checkbox" name="sds_med" value="Ondansetrona">
+                                Ondansetrona</label>
+                            <label class="checkbox-label"><input type="checkbox" name="sds_med" value="Dexametasona">
+                                Dexametasona</label>
+                            <label class="checkbox-label"><input type="checkbox" name="sds_med" value="Morfina">
+                                Morfina</label>
+                            <label class="checkbox-label"><input type="checkbox" name="sds_med" value="Tramadol">
+                                Tramadol</label>
+                        </div>
+                        <input type="text" name="sds_outros" placeholder="Outras..." style="margin-top:8px;">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Balanço Hídrico Intra-Op</label>
+                        <div class="grid-2">
+                            <input type="text" id="cristaloide" name="cristaloide" placeholder="Cristaloide (ml)">
+                            <input type="text" id="coloide" name="coloide" placeholder="Colóide (ml)">
+                            <input type="text" id="diurese" name="diurese" placeholder="Diurese (ml)">
+                            <input type="text" id="sangramento" name="sangramento" placeholder="Sangramento (ml)">
+                            <input type="text" id="transfusao" name="transfusao" placeholder="Transfusão (Bolsas)">
+                            <input type="text" id="bh_outros" name="bh_outros" placeholder="Outros">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Intercorrências Peri-op</label>
+                        <textarea id="intercorrencias" name="intercorrencias" rows="2"
+                            placeholder="Descrever..."></textarea>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 3. ADMISSÃO NO CTI -->
+            <div class="card">
+                <div class="section-header" onclick="toggleSection(this)">
+                    <span class="section-title">3. Admissão CTI (Exame Físico)</span>
+                    <span class="toggle-icon">▼</span>
+                </div>
+                <div class="section-content">
+                    <div class="form-group">
+                        <label>Estado Neurológico</label>
+                        <div class="checkbox-group">
+                            <label class="radio-label"><input type="radio" name="neuro" value="Desperto">
+                                Desperto</label>
+                            <label class="radio-label"><input type="radio" name="neuro" value="Efeito Residual"> Efeito
+                                Residual</label>
+                            <label class="radio-label"><input type="radio" name="neuro" value="Rebaixado">
+                                Rebaixado</label>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Sinais Vitais</label>
+                        <div class="grid-2">
+                            <input type="text" id="sv_pa" name="sv_pa" placeholder="PA (mmHg)">
+                            <input type="text" id="sv_fc" name="sv_fc" placeholder="FC (bpm)">
+                            <input type="text" id="sv_fr" name="sv_fr" placeholder="FR (irpm)">
+                            <input type="text" id="sv_spo2" name="sv_spo2" placeholder="SpO2 (%)">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Invasões</label>
+                        <div class="grid-2">
+                            <div style="display:flex; gap:4px; align-items:center;">
+                                <label class="checkbox-label"><input type="checkbox" name="invasao" value="PAM">
+                                    PAM</label>
+                                <input type="text" id="inv_pam_loc" placeholder="Local"
+                                    style="font-size:0.8rem; padding:6px;">
+                            </div>
+                            <div style="display:flex; gap:4px; align-items:center;">
+                                <label class="checkbox-label"><input type="checkbox" name="invasao" value="PVP">
+                                    PVP</label>
+                                <input type="text" id="inv_pvp_loc" placeholder="Local"
+                                    style="font-size:0.8rem; padding:6px;">
+                            </div>
+                        </div>
+                        <div class="checkbox-group" style="margin-top:8px;">
+                            <label class="checkbox-label"><input type="checkbox" name="invasao" value="Periférico">
+                                Periférico</label>
+                            <label class="checkbox-label"><input type="checkbox" name="invasao" value="CNE"> CNE</label>
+                            <label class="checkbox-label"><input type="checkbox" name="invasao" value="CNG"> CNG</label>
+                            <label class="checkbox-label"><input type="checkbox" name="invasao" value="CVD"> CVD</label>
+                            <label class="checkbox-label"><input type="checkbox" name="invasao" value="Peridural"> Cat.
+                                Peridural</label>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Drenos</label>
+                        <textarea id="drenos" name="drenos" rows="2" placeholder="Descrever drenos..."></textarea>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 4. SCORES E PROTOCOLOS -->
+            <div class="card">
+                <div class="section-header" onclick="toggleSection(this)">
+                    <span class="section-title">4. Orientações da Equipe Assistente</span>
+                    <span class="toggle-icon">▼</span>
+                </div>
+                <div class="section-content">
+                    <div class="form-group">
+                        <label>Cabeceira</label>
+                        <div class="checkbox-group">
+                            <label class="radio-label"><input type="radio" name="cabeceira" value="Elevada">
+                                Elevada</label>
+                            <label class="radio-label"><input type="radio" name="cabeceira" value="Limitada"> Limitada a
+                                <input type="number" id="cabeceira_graus"
+                                    style="width:60px; padding:4px; margin-left:4px;"> graus</label>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Deambular e sentar fora do leito em 12-24h?</label>
+                        <div class="radio-group">
+                            <label class="radio-label"><input type="radio" name="deambular" value="Sim"> Sim</label>
+                            <label class="radio-label"><input type="radio" name="deambular" value="Não"> Não</label>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Se estável, aguardar visita da equipe para alta?</label>
+                        <div class="radio-group">
+                            <label class="radio-label"><input type="radio" name="alta_visita" value="Sim"> Sim</label>
+                            <label class="radio-label"><input type="radio" name="alta_visita" value="Não"> Não</label>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Cuidados especiais na mobilização?</label>
+                        <div class="radio-group">
+                            <label class="radio-label"><input type="radio" name="cuidados_mob" value="Não"> Não</label>
+                            <label class="radio-label"><input type="radio" name="cuidados_mob" value="Sim"> Sim</label>
+                        </div>
+                        <input type="text" id="mob_especificar" placeholder="Sim... Especificar"
+                            style="margin-top:8px;">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Dieta</label>
+                        <div class="checkbox-group">
+                            <label class="radio-label"><input type="radio" name="dieta" value="Zero até 2a ordem"> Zero
+                                até 2ª ordem</label>
+                            <label class="radio-label"><input type="radio" name="dieta" value="Liberada"> Liberada após
+                                <input type="text" id="dieta_tempo" placeholder="H:MM"
+                                    style="width:70px; padding:4px; margin:0 4px;"></label>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="checkbox-label" style="justify-content:flex-start; font-weight:600;">
+                            <input type="checkbox" name="compressor" value="Sim"> Compressor pneumático de MMII
+                        </label>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Clexane</label>
+                        <div class="checkbox-group" style="margin-bottom: 8px;">
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="check_clexane" onchange="toggleClexane(this)"> Prescrever
+                                Clexane?
+                            </label>
+                        </div>
+                        <div class="grid-2">
+                            <input type="date" id="heparina_data" disabled>
+                            <input type="time" id="heparina_hora" disabled>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Acompanhamento conjunto pela clínica médica na alta?</label>
+                        <div class="radio-group">
+                            <label class="radio-label"><input type="radio" name="clinica_medica" value="Sim">
+                                Sim</label>
+                            <label class="radio-label"><input type="radio" name="clinica_medica" value="Não">
+                                Não</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="action-bar">
+                <button type="button" class="btn btn-secondary" onclick="resetForm()">Limpar</button>
+                <button type="button" class="btn btn-primary" onclick="generateSummary()">Gerar Resumo</button>
+            </div>
+
+        </form>
+    </div>
+
+    <!-- Summary Modal -->
+    <div class="modal-overlay" id="summaryModal">
+        <div class="modal">
+            <div class="modal-header">
+                <div class="modal-title">Resumo do Caso</div>
+                <button type="button" onclick="closeModal()"
+                    style="border:none;background:none;font-size:1.5rem;cursor:pointer;">&times;</button>
+            </div>
+            <pre class="modal-body" id="summaryText"></pre>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="closeModal()">Fechar</button>
+                <button type="button" class="btn btn-secondary" onclick="generateCalendarEvent()"
+                    style="background-color: #f59e0b; color: white; border: none;">Criar Lembrete</button>
+                <button type="button" class="btn btn-primary" onclick="copyToClipboard()">Copiar Texto</button>
+                <button type="button" id="btnDontpad" class="btn btn-secondary"
+                    style="background-color: #3b82f6; color: white; border: none;" onclick="copyAndOpenDontpad()">Colar
+                    no Dontpad</button>
+            </div>
+        </div>
+    </div>
+    </div>
+
+    <script src="app.js?v=1.2"></script>
+</body>
+
+</html>
