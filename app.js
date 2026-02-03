@@ -285,13 +285,15 @@ function generateClinicalSummary() {
         } else if (inv === 'PAM' && data.clin_pam_loc) {
             text += ` ${data.clin_pam_loc}`;
         }
-        invasionStrings.push(text);
+        // Prepend date to each invasion
+        const itemWithDate = dateFormatted ? `${dateFormatted} ${text}` : text;
+        invasionStrings.push(itemWithDate);
     });
 
     let invStr = invasionStrings.join(', ') || 'Nenhuma';
 
     const summary = `*ADMISSÃO CLÍNICA*\n` +
-        `${leito} | ${dateFormatted} | ${hora}\n` +
+        `Leito: ${leito}\n` +
         `—----------------------------------\n` +
         `INSTABILIDADE:\n${instStr}\n` +
         `—----------------------------------\n` +
