@@ -41,29 +41,36 @@
                 <p>Selecione o tipo de admissão</p>
             </header>
 
-            <div class="dashboard-grid">
-                <div class="card dashboard-card" onclick="navigateTo('view-clinical')">
-                    <div class="card-icon">🩺</div>
-                    <h3>Avaliação Clínica Inicial</h3>
-                    <p>Paciente clínico</p>
+            <div class="dashboard-container">
+                <!-- Top Row: ACL & ACC (Big & Blue) -->
+                <div class="dashboard-row">
+                    <div class="dashboard-card primary" onclick="navigateTo('view-clinical')">
+                        <div class="card-icon">🩺</div>
+                        <h3>ACL</h3>
+                        <p>Clínica</p>
+                    </div>
+
+                    <div class="dashboard-card primary" onclick="navigateTo('view-surgical')">
+                        <div class="card-icon">🔪</div>
+                        <h3>ACC</h3>
+                        <p>Cirúrgica</p>
+                    </div>
                 </div>
 
-                <div class="card dashboard-card" onclick="navigateTo('view-surgical')">
-                    <div class="card-icon">🔪</div>
-                    <h3>Admissão Cirúrgica</h3>
-                    <p>Pós-operatório imediato</p>
+                <!-- Middle Row: Reavaliação (Medium) -->
+                <div class="dashboard-row">
+                    <div class="dashboard-card secondary" onclick="alert('Em breve!')">
+                        <div class="card-icon">🔄</div>
+                        <h3>Reavaliação</h3>
+                        <p>Evolução</p>
+                    </div>
                 </div>
 
-                <div class="card dashboard-card" onclick="alert('Em breve!')">
-                    <div class="card-icon">🔄</div>
-                    <h3>Reavaliação</h3>
-                    <p>Evolução diária</p>
-                </div>
-
-                <div class="card dashboard-card" onclick="resumeSession()">
-                    <div class="card-icon">📂</div>
-                    <h3>Abrir Anterior</h3>
-                    <p>Continuar rascunho</p>
+                <!-- Bottom Row: Rascunho (Small) -->
+                <div class="dashboard-row">
+                    <div class="dashboard-card tertiary" onclick="resumeSession()">
+                        <h3>D (Rascunho)</h3>
+                    </div>
                 </div>
             </div>
         </div>
