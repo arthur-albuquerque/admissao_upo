@@ -2,6 +2,7 @@
 
 // --- State Management & Autosave ---
 const STORAGE_KEY = 'upo_admission_form_data';
+const STORAGE_KEY_REAV = 'upo_reavaliacao_data';
 
 function saveToLocal() {
     const data = {};
@@ -24,6 +25,24 @@ function saveToLocal() {
     extractFormData('admissionForm');
     extractFormData('clinicalForm');
 
+    // Separate logic for Reavaliacao
+    const reavData = {};
+    const extractReavData = () => {
+        const form = document.getElementById('reavaliacaoForm');
+        if (!form) return;
+        const formData = new FormData(form);
+        for (const [key, value] of formData.entries()) {
+            if (reavData[key]) {
+                if (!Array.isArray(reavData[key])) reavData[key] = [reavData[key]];
+                reavData[key].push(value);
+            } else {
+                reavData[key] = value;
+            }
+        }
+        reavData._last_saved = new Date().toISOString();
+    };
+    extractReavData();
+
     // Also save specific UI states that aren't inputs
     const checkClexane = document.getElementById('check_clexane');
     const negaAlergia = document.getElementById('nega_alergia');
@@ -42,6 +61,7 @@ function saveToLocal() {
     data._last_saved = new Date().toISOString();
 
     localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+    localStorage.setItem(STORAGE_KEY_REAV, JSON.stringify(reavData));
 }
 
 function loadFromLocal() {
@@ -122,6 +142,38 @@ function loadFromLocal() {
             if (el) {
                 el.checked = true;
                 toggleClinPAM(el);
+            }
+        }
+
+        // Load Reavaliacao Data
+        const rawReav = localStorage.getItem(STORAGE_KEY_REAV);
+        if (rawReav) {
+            try {
+                const data = JSON.parse(rawReav);
+                const form = document.getElementById('reavaliacaoForm');
+                if (form) {
+                    Object.keys(data).forEach(key => {
+                        if (key.startsWith('_')) return;
+                        const input = form.elements[key];
+                        if (!input) return;
+
+                        // Handle Checkboxes/Radios vs Text
+                        if (input instanceof RadioNodeList || (input.length > 1 && input[0].type !== 'select-one')) {
+                            const values = Array.isArray(data[key]) ? data[key] : [data[key]];
+                            Array.from(input).forEach(radio => {
+                                if (values.includes(radio.value)) {
+                                    radio.checked = true;
+                                }
+                            });
+                        } else if (input.type === 'checkbox') {
+                            input.checked = !!data[key];
+                        } else {
+                            input.value = data[key];
+                        }
+                    });
+                }
+            } catch (e) {
+                console.error('Error loading reav save', e);
             }
         }
 
@@ -237,23 +289,52 @@ function navigateTo(viewId) {
 }
 
 function resumeSession() {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (raw) {
-        try {
-            const data = JSON.parse(raw);
-            // Decide which view to open based on available data
-            if (data.clin_leito || data.clin_hora || data.inst_neuro) {
-                navigateTo('view-clinical');
-            } else {
-                navigateTo('view-surgical');
-            }
-            loadFromLocal();
-            showToast('Sessão restaurada', 'success');
-        } catch (e) {
-            showToast('Erro ao carregar rascunho', 'error');
-        }
-    } else {
+    const rawAdm = localStorage.getItem(STORAGE_KEY);
+    const rawReav = localStorage.getItem(STORAGE_KEY_REAV);
+
+    if (!rawAdm && !rawReav) {
         showToast('Nenhum rascunho encontrado', 'warning');
+        return;
+    }
+
+    // Determine target based on user choice if both exist
+    if (rawAdm && rawReav) {
+        // Simple choice prompt
+        // Custom modal would be better but keeping it simple as requested
+        // "agora tem que aparecer a opção" - using a native confirm/prompt approach or simple logic
+        // Let's use a simple native confirm flow:
+        // "OK" for Resumo de Admissão, "Cancel" for Reavaliação? No, that's confusing.
+        // Let's check which one is newer? No, user explicitly wants to choose.
+        // I will use a custom small modal or just `confirm`.
+        // Since I cannot inject complex UI easily right now, I'll use `confirm` for Reavaliacao.
+        if (confirm("Deseja abrir o rascunho da ADMISSÃO?\n\n[OK] Admissão\n[Cancelar] Reavaliação")) {
+            restoreAdmission(rawAdm);
+        } else {
+            navigateTo('view-reavaliacao');
+            loadFromLocal(); // Loads everything but view is set
+            showToast('Reavaliação restaurada', 'success');
+        }
+    } else if (rawAdm) {
+        restoreAdmission(rawAdm);
+    } else {
+        navigateTo('view-reavaliacao');
+        loadFromLocal();
+        showToast('Reavaliação restaurada', 'success');
+    }
+}
+
+function restoreAdmission(raw) {
+    try {
+        const data = JSON.parse(raw);
+        if (data.clin_leito || data.clin_hora || data.inst_neuro) {
+            navigateTo('view-clinical');
+        } else {
+            navigateTo('view-surgical');
+        }
+        loadFromLocal();
+        showToast('Sessão restaurada', 'success');
+    } catch (e) {
+        showToast('Erro ao carregar rascunho', 'error');
     }
 }
 
@@ -435,7 +516,7 @@ document.addEventListener('DOMContentLoaded', () => {
         timeout = setTimeout(saveToLocal, 1000); // Auto-save after 1s of inactivity
     };
 
-    const forms = ['admissionForm', 'clinicalForm'];
+    const forms = ['admissionForm', 'clinicalForm', 'reavaliacaoForm'];
     forms.forEach(id => {
         const f = document.getElementById(id);
         if (f) f.addEventListener('input', saveHandler);
@@ -882,3 +963,52 @@ function generateCalendarEvent() {
 
     showToast('Lembrete criado!', 'success');
 }
+// Logic: Check Reavaliacao
+function checkReavaliacao() {
+    const getValue = (id) => document.getElementById(id)?.value || 'N/I';
+    const getRadio = (name) => document.querySelector(`input[name="${name}"]:checked`)?.value || 'Não';
+
+    const leito = getValue('reav_leito');
+
+    // Instability Logic
+    const negatives = [];
+
+    // Helper to format instability text
+    const formatInst = (val, label) => {
+        if (val === 'Sim') {
+            return `- Instabilidade ${label.toLowerCase()}`;
+        }
+        return null;
+    };
+
+    const instItems = [
+        { val: getRadio('reav_inst_neuro'), label: 'Neurológica' },
+        { val: getRadio('reav_inst_hemo'), label: 'Hemodinâmica' },
+        { val: getRadio('reav_inst_vent'), label: 'Ventilatória' },
+        { val: getRadio('reav_inst_dor'), label: 'Dor forte' }
+    ];
+
+    instItems.forEach(item => {
+        const res = formatInst(item.val, item.label);
+        if (res) negatives.push(res);
+    });
+
+    if (negatives.length > 0) {
+        // Show modal with reminder button
+        // We reuse summaryModal but hide the main text area or show simplified text
+        const summary = `Leito: ${leito}\n\n${negatives.join('\n')}`;
+
+        document.getElementById('summaryText').textContent = summary.trim();
+        document.getElementById('summaryModal').dataset.reminderContent = summary.trim();
+
+        // Show reminder button
+        const reminderBtn = document.getElementById('reminderButton');
+        if (reminderBtn) reminderBtn.classList.remove('hidden');
+
+        document.getElementById('summaryModal').classList.add('open');
+    } else {
+        // No instability, show toast
+        showToast('Paciente estável. Nenhuma instabilidade marcada.', 'success');
+    }
+}
+window.checkReavaliacao = checkReavaliacao;

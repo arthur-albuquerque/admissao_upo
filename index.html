@@ -57,7 +57,7 @@
 
                 <!-- Middle Row: Reavaliação (Medium) -->
                 <div class="dashboard-row">
-                    <div class="dashboard-card secondary" onclick="alert('Em breve!')">
+                    <div class="dashboard-card secondary" onclick="navigateTo('view-reavaliacao')">
                         <div class="card-icon">🔄</div>
                         <h3>Reavaliação Precoce</h3>
                     </div>
@@ -206,6 +206,94 @@
                     <button type="button" class="btn btn-secondary" onclick="resetForm('clinicalForm')">Limpar</button>
                     <button type="button" class="btn btn-primary" onclick="generateClinicalSummary()">Gerar
                         Resumo</button>
+                </div>
+            </form>
+        </div>
+
+        <!-- View: Reavaliação Precoce -->
+        <div id="view-reavaliacao" class="view hidden">
+            <header>
+                <button type="button" class="btn-back" onclick="navigateTo('view-home')">← Voltar</button>
+                <h1>Reavaliação Precoce</h1>
+                <p>Checagem Rápida</p>
+            </header>
+
+            <form id="reavaliacaoForm">
+                <!-- 1. IDENTIFICAÇÃO -->
+                <div class="card">
+                    <div class="section-header">
+                        <span class="section-title">1. Identificação</span>
+                    </div>
+                    <div class="section-content">
+                        <div class="grid-3">
+                            <div class="form-group">
+                                <label>Leito</label>
+                                <input type="text" id="reav_leito" name="reav_leito" placeholder="Ex: 315">
+                            </div>
+                            <div class="form-group">
+                                <label>Data</label>
+                                <input type="date" id="reav_data" name="reav_data">
+                            </div>
+                            <div class="form-group">
+                                <label>Horário</label>
+                                <input type="time" id="reav_hora" name="reav_hora">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 2. HÁ INSTABILIDADE? -->
+                <div class="card">
+                    <div class="section-header">
+                        <span class="section-title">2. Há Instabilidade?</span>
+                    </div>
+                    <div class="section-content">
+                        <div class="instability-grid">
+                            <div class="instability-item">
+                                <label>Neurológica</label>
+                                <div class="radio-group-horizontal">
+                                    <label class="radio-label"><input type="radio" name="reav_inst_neuro" value="Não">
+                                        Não</label>
+                                    <label class="radio-label"><input type="radio" name="reav_inst_neuro" value="Sim">
+                                        Sim</label>
+                                </div>
+                            </div>
+                            <div class="instability-item">
+                                <label>Hemodinâmica</label>
+                                <div class="radio-group-horizontal">
+                                    <label class="radio-label"><input type="radio" name="reav_inst_hemo" value="Não">
+                                        Não</label>
+                                    <label class="radio-label"><input type="radio" name="reav_inst_hemo" value="Sim">
+                                        Sim</label>
+                                </div>
+                            </div>
+                            <div class="instability-item">
+                                <label>Ventilatória</label>
+                                <div class="radio-group-horizontal">
+                                    <label class="radio-label"><input type="radio" name="reav_inst_vent" value="Não">
+                                        Não</label>
+                                    <label class="radio-label"><input type="radio" name="reav_inst_vent" value="Sim">
+                                        Sim</label>
+                                </div>
+                            </div>
+                            <div class="instability-item">
+                                <label>Dor Forte</label>
+                                <div class="radio-group-horizontal">
+                                    <label class="radio-label"><input type="radio" name="reav_inst_dor" value="Não">
+                                        Não</label>
+                                    <label class="radio-label"><input type="radio" name="reav_inst_dor" value="Sim">
+                                        Sim</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="action-bar" style="position: static; margin-top: 24px;">
+                    <button type="button" class="btn btn-secondary"
+                        onclick="resetForm('reavaliacaoForm')">Limpar</button>
+                    <!-- Check button -->
+                    <button type="button" class="btn btn-primary" onclick="checkReavaliacao()">Checar</button>
                 </div>
             </form>
         </div>
