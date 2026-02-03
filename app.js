@@ -298,22 +298,9 @@ function resumeSession() {
     }
 
     // Determine target based on user choice if both exist
+    // Determine target based on user choice if both exist
     if (rawAdm && rawReav) {
-        // Simple choice prompt
-        // Custom modal would be better but keeping it simple as requested
-        // "agora tem que aparecer a opção" - using a native confirm/prompt approach or simple logic
-        // Let's use a simple native confirm flow:
-        // "OK" for Resumo de Admissão, "Cancel" for Reavaliação? No, that's confusing.
-        // Let's check which one is newer? No, user explicitly wants to choose.
-        // I will use a custom small modal or just `confirm`.
-        // Since I cannot inject complex UI easily right now, I'll use `confirm` for Reavaliacao.
-        if (confirm("Deseja abrir o rascunho da ADMISSÃO?\n\n[OK] Admissão\n[Cancelar] Reavaliação")) {
-            restoreAdmission(rawAdm);
-        } else {
-            navigateTo('view-reavaliacao');
-            loadFromLocal(); // Loads everything but view is set
-            showToast('Reavaliação restaurada', 'success');
-        }
+        document.getElementById('restoreModal').classList.add('open');
     } else if (rawAdm) {
         restoreAdmission(rawAdm);
     } else {
@@ -322,6 +309,24 @@ function resumeSession() {
         showToast('Reavaliação restaurada', 'success');
     }
 }
+
+function closeRestoreModal() {
+    document.getElementById('restoreModal').classList.remove('open');
+}
+
+function confirmRestore(type) {
+    closeRestoreModal();
+    if (type === 'admission') {
+        const rawAdm = localStorage.getItem(STORAGE_KEY);
+        if (rawAdm) restoreAdmission(rawAdm);
+    } else {
+        navigateTo('view-reavaliacao');
+        loadFromLocal();
+        showToast('Reavaliação restaurada', 'success');
+    }
+}
+window.closeRestoreModal = closeRestoreModal;
+window.confirmRestore = confirmRestore;
 
 function restoreAdmission(raw) {
     try {
@@ -508,6 +513,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const clinHora = document.getElementById('clin_hora');
     if (clinData) clinData.valueAsDate = now;
     if (clinHora) clinHora.value = now.toTimeString().slice(0, 5);
+
+    // Set default values for Reavaliacao
+    const reavData = document.getElementById('reav_data');
+    const reavHora = document.getElementById('reav_hora');
+    if (reavData) reavData.valueAsDate = now;
+    if (reavHora) reavHora.value = now.toTimeString().slice(0, 5);
 
     // Autosave Trigger: Debounced input listener
     let timeout;

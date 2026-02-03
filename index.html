@@ -783,11 +783,32 @@
         </div>
     </div>
 
+    <!-- Restore Choice Modal -->
+    <div class="modal-overlay" id="restoreModal">
+        <div class="modal sm">
+            <div class="modal-header">
+                <div class="modal-title">Continuar Rascunho</div>
+                <button type="button" onclick="closeRestoreModal()"
+                    style="border:none;background:none;font-size:1.5rem;cursor:pointer;">&times;</button>
+            </div>
+            <div class="modal-body" style="text-align: center; padding: 20px 0;">
+                <p>Qual rascunho você deseja abrir?</p>
+            </div>
+            <div class="modal-footer" style="flex-direction: column; gap: 10px;">
+                <button type="button" class="btn btn-primary" style="width: 100%;"
+                    onclick="confirmRestore('admission')">Admissão (Clínica/Cirúrgica)</button>
+                <button type="button" class="btn btn-secondary"
+                    style="width: 100%; border: 1px solid var(--border-color);"
+                    onclick="confirmRestore('reavaliacao')">Reavaliação Precoce</button>
+            </div>
+        </div>
+    </div>
+
     <!-- UI Overlay Elements -->
     <div id="toastContainer" class="toast-container"></div>
     </div>
 
-    <script src="app.js?v=5.7"></script>
+    <script src="app.js?v=5.9"></script>
 </body>
 
 </html>
