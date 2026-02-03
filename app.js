@@ -470,7 +470,7 @@ function copyAndOpenDontpad() {
     const text = document.getElementById('summaryText').textContent;
     navigator.clipboard.writeText(text).then(() => {
         showToast('Copiado! Abrindo Dontpad...', 'success');
-        window.open('http://dontpad.com/admissao_upo2026', '_blank');
+        window.open('http://dontpad.com/admissao_upo_cirurgica', '_blank');
     });
 }
 
