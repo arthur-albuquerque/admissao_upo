@@ -160,9 +160,31 @@ function toggleClinPAM(checkbox) {
         document.getElementById('clin_pam_loc').value = '';
     }
 }
+function toggleSurgPVP(checkbox) {
+    const el = document.getElementById('inv_pvp_loc');
+    if (checkbox.checked) {
+        el.classList.remove('hidden');
+    } else {
+        el.classList.add('hidden');
+        el.value = '';
+    }
+}
+
+function toggleSurgPAM(checkbox) {
+    const el = document.getElementById('inv_pam_loc');
+    if (checkbox.checked) {
+        el.classList.remove('hidden');
+    } else {
+        el.classList.add('hidden');
+        el.value = '';
+    }
+}
+
 window.toggleVAD = toggleVAD;
 window.toggleClinPVP = toggleClinPVP;
 window.toggleClinPAM = toggleClinPAM;
+window.toggleSurgPVP = toggleSurgPVP;
+window.toggleSurgPAM = toggleSurgPAM;
 
 // --- Toast System ---
 function showToast(message, type = 'success') {

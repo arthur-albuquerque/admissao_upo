@@ -14,7 +14,7 @@
     <link rel="apple-touch-icon" href="icon-192.png">
 
     <title>Admissão UPO</title>
-    <link rel="stylesheet" href="style.css?v=3.8">
+    <link rel="stylesheet" href="style.css?v=3.9">
 
     <!-- Register Service Worker -->
     <script>
@@ -475,17 +475,21 @@
                         <div class="form-group">
                             <label>Invasões</label>
                             <div class="grid-2">
-                                <div style="display:flex; gap:4px; align-items:center;">
-                                    <label class="checkbox-label"><input type="checkbox" name="invasao" value="PAM">
-                                        PAM</label>
-                                    <input type="text" id="inv_pam_loc" placeholder="AFD"
-                                        style="font-size:0.8rem; padding:6px;">
+                                <div style="display:flex; flex-direction: column; gap:4px;">
+                                    <div style="display:flex; gap:4px; align-items:center;">
+                                        <label class="checkbox-label"><input type="checkbox" id="surg_pam_check"
+                                                name="invasao" value="PAM" onchange="toggleSurgPAM(this)"> PAM</label>
+                                    </div>
+                                    <input type="text" id="inv_pam_loc" placeholder="Ex: AFD" class="hidden"
+                                        style="font-size:0.8rem; padding:6px; margin-left: 24px; margin-bottom: 8px;">
                                 </div>
-                                <div style="display:flex; gap:4px; align-items:center;">
-                                    <label class="checkbox-label"><input type="checkbox" name="invasao" value="PVP">
-                                        PVP</label>
-                                    <input type="text" id="inv_pvp_loc" placeholder="VJIE"
-                                        style="font-size:0.8rem; padding:6px;">
+                                <div style="display:flex; flex-direction: column; gap:4px;">
+                                    <div style="display:flex; gap:4px; align-items:center;">
+                                        <label class="checkbox-label"><input type="checkbox" id="surg_pvp_check"
+                                                name="invasao" value="PVP" onchange="toggleSurgPVP(this)"> PVP</label>
+                                    </div>
+                                    <input type="text" id="inv_pvp_loc" placeholder="Ex: VJIE" class="hidden"
+                                        style="font-size:0.8rem; padding:6px; margin-left: 24px; margin-bottom: 8px;">
                                 </div>
                             </div>
                             <div class="checkbox-group" style="margin-top:8px;">
@@ -689,7 +693,7 @@
     <div id="toastContainer" class="toast-container"></div>
     </div>
 
-    <script src="app.js?v=3.8"></script>
+    <script src="app.js?v=3.9"></script>
 </body>
 
 </html>
