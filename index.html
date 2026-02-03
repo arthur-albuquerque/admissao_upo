@@ -14,7 +14,7 @@
     <link rel="apple-touch-icon" href="icon-192.png">
 
     <title>Admissão UPO</title>
-    <link rel="stylesheet" href="style.css?v=5.7">
+    <link rel="stylesheet" href="style.css?v=6.0">
 
     <!-- Register Service Worker -->
     <script>
@@ -786,15 +786,12 @@
     <!-- Restore Choice Modal -->
     <div class="modal-overlay" id="restoreModal">
         <div class="modal sm">
-            <div class="modal-header">
-                <div class="modal-title">Continuar Rascunho</div>
+            <div class="modal-header" style="border-bottom: none; padding-bottom: 0;">
+                <div class="modal-title" style="width: 100%; text-align: center;">Qual rascunho?</div>
                 <button type="button" onclick="closeRestoreModal()"
-                    style="border:none;background:none;font-size:1.5rem;cursor:pointer;">&times;</button>
+                    style="border:none;background:none;font-size:1.5rem;cursor:pointer; position: absolute; right: 16px;">&times;</button>
             </div>
-            <div class="modal-body" style="text-align: center; padding: 20px 0;">
-                <p>Qual rascunho você deseja abrir?</p>
-            </div>
-            <div class="modal-footer" style="flex-direction: column; gap: 10px;">
+            <div class="modal-footer" style="flex-direction: column; gap: 12px; padding-top: 10px;">
                 <button type="button" class="btn btn-primary" style="width: 100%;"
                     onclick="confirmRestore('admission')">Admissão (Clínica/Cirúrgica)</button>
                 <button type="button" class="btn btn-secondary"
@@ -808,7 +805,7 @@
     <div id="toastContainer" class="toast-container"></div>
     </div>
 
-    <script src="app.js?v=5.9"></script>
+    <script src="app.js?v=6.0"></script>
 </body>
 
 </html>
