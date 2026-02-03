@@ -395,6 +395,10 @@ Orientações:
 
     document.getElementById('summaryText').textContent = summary.trim();
 
+    // Store simplified content for reminder
+    const reminderContent = `Leito: ${leito}\n\n${negatives.join('\n')}`;
+    document.getElementById('summaryModal').dataset.reminderContent = reminderContent;
+
     // Show/Hide Reminder Button based on instabilities
     const reminderBtn = document.getElementById('reminderButton');
     if (reminderBtn) {
@@ -759,6 +763,11 @@ ${walkCheck.replace('(x)', '(x)').replace('( )', '( )')} liberado para deambular
 
     document.getElementById('summaryText').textContent = summary.trim();
 
+    // Store simplified content for reminder (Surgical)
+    const leitoVal = getValue('leito_admissao') || 'N/I';
+    const reminderContentSurg = `Leito: ${leitoVal}\n\n${negatives.join('\n')}`;
+    document.getElementById('summaryModal').dataset.reminderContent = reminderContentSurg;
+
     // Show/Hide Reminder Button based on instabilities
     const reminderBtn = document.getElementById('reminderButton');
     if (reminderBtn) {
@@ -841,8 +850,11 @@ function generateCalendarEvent() {
     };
 
     const summary = document.getElementById('summaryText').textContent;
+    // Use stored simplified content if available, else fallback to full summary
+    const content = document.getElementById('summaryModal').dataset.reminderContent || summary;
+
     const title = `Revisar Paciente (UPO)`;
-    const description = `Lembrete de revisão.\n\n${summary}`;
+    const description = `Lembrete de revisão.\n\n${content}`;
 
     const icsContent = [
         'BEGIN:VCALENDAR',
