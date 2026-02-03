@@ -1,4 +1,4 @@
-const CACHE_NAME = 'upo-app-v1';
+const CACHE_NAME = 'upo-app-v2';
 const ASSETS_TO_CACHE = [
     './',
     './index.html',
@@ -9,6 +9,7 @@ const ASSETS_TO_CACHE = [
 
 // Install Event: Cache files
 self.addEventListener('install', (event) => {
+    self.skipWaiting(); // Force active immediately
     event.waitUntil(
         caches.open(CACHE_NAME).then((cache) => {
             console.log('[Service Worker] Caching assets');
