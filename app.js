@@ -756,7 +756,7 @@ function generateSummary() {
 ( ) Lab rotina 
 ${dietCheck.replace('(x)', '(x)').replace('( )', '( )')} ${dietText}
 ${clexaneCheck.replace('(x)', '(x)').replace('( )', '( )')} ${clexaneText}
-${walkCheck.replace('(x)', '(x)').replace('( )', '( )')} deambular em 12h
+${walkCheck.replace('(x)', '(x)').replace('( )', '( )')} liberado para deambular?
 (x) Checar reconciliação
 ( ) Nome do familiar / acompanhante
 ( ) Coletar TCI
