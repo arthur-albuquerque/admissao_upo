@@ -398,6 +398,8 @@ Orientações:
 ( ) Parametrização na prescrição 
 ( ) Check Prontuario fisico`;
 
+    let invStr = invasionStrings.join('\n') || 'Nenhuma invasão';
+
     const summary = `${leito}\n\n\n${instStr}\n\n\n${invStr}\n\n\n${section3}`;
 
     document.getElementById('summaryText').textContent = summary.trim();
