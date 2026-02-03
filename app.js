@@ -1,11 +1,146 @@
 // App Logic for CTI Admission Form
 
-// Initialize
+// --- State Management & Autosave ---
+const STORAGE_KEY = 'upo_admission_form_data';
+
+function saveToLocal() {
+    const formData = new FormData(document.getElementById('admissionForm'));
+    const data = {};
+    for (const [key, value] of formData.entries()) {
+        // Handle multi-value checkboxes (arrays)
+        if (data[key]) {
+            if (!Array.isArray(data[key])) {
+                data[key] = [data[key]];
+            }
+            data[key].push(value);
+        } else {
+            data[key] = value;
+        }
+    }
+
+    // Also save specific UI states that aren't inputs
+    data._ui_clexane = document.getElementById('check_clexane').checked;
+    data._ui_nega_alergia = document.getElementById('nega_alergia').checked;
+    data._ui_imc = document.getElementById('imc_display').textContent;
+    data._last_saved = new Date().toISOString();
+
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+    showToast('Rascunho salvo', 'success');
+}
+
+function loadFromLocal() {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return;
+
+    try {
+        const data = JSON.parse(raw);
+        console.log('Restoring data from', data._last_saved);
+
+        // Inputs
+        const form = document.getElementById('admissionForm');
+        Object.keys(data).forEach(key => {
+            if (key.startsWith('_ui_')) return;
+
+            const input = form.elements[key];
+            if (!input) return;
+
+            // Handle Checkboxes/Radios vs Text
+            if (input instanceof RadioNodeList || (input.length > 1 && input[0].type !== 'select-one')) {
+                // Radio or Checkbox Group
+                const values = Array.isArray(data[key]) ? data[key] : [data[key]];
+                Array.from(input).forEach(radio => {
+                    if (values.includes(radio.value)) {
+                        radio.checked = true;
+                    }
+                });
+            } else if (input.type === 'checkbox') {
+                input.checked = !!data[key]; // Single checkbox logic if any (rare here)
+            } else {
+                input.value = data[key];
+            }
+        });
+
+        // UI Specifics
+        if (data._ui_clexane) {
+            document.getElementById('check_clexane').checked = true;
+            toggleClexane(document.getElementById('check_clexane'));
+        }
+        if (data._ui_nega_alergia) {
+            document.getElementById('nega_alergia').checked = true;
+            toggleAllergyInput(document.getElementById('nega_alergia'));
+        }
+        if (data._ui_imc) {
+            const disp = document.getElementById('imc_display');
+            disp.textContent = data._ui_imc;
+            if (data._ui_imc !== '-') disp.classList.add('highlight');
+        }
+
+        // Section Headers - Auto expand if data present? 
+        // Optional: keep them collapsed for visual clarity.
+
+    } catch (e) {
+        console.error('Error loading save', e);
+    }
+}
+
+// --- Toast System ---
+function showToast(message, type = 'success') {
+    const container = document.getElementById('toastContainer');
+    const toast = document.createElement('div');
+    toast.className = `toast ${type}`;
+
+    let icon = '✅';
+    if (type === 'error') icon = '❌';
+    if (type === 'warning') icon = '⚠️';
+
+    toast.innerHTML = `<span>${icon}</span> ${message}`;
+    container.appendChild(toast);
+
+    // Animate in
+    requestAnimationFrame(() => {
+        toast.classList.add('show');
+    });
+
+    // Remove
+    setTimeout(() => {
+        toast.classList.remove('show');
+        setTimeout(() => toast.remove(), 300);
+    }, 3000);
+}
+
+// --- Offline Detector ---
+function updateOnlineStatus() {
+    const badge = document.getElementById('offlineBadge');
+    if (navigator.onLine) {
+        badge.classList.remove('visible');
+    } else {
+        badge.classList.add('visible');
+    }
+}
+
+// --- Initialize ---
 document.addEventListener('DOMContentLoaded', () => {
-    // Set default date/time to now
+    // Set default date/time to now if empty (loadFromLocal might overwrite)
     const now = new Date();
     document.getElementById('data_admissao').valueAsDate = now;
     document.getElementById('hora_admissao').value = now.toTimeString().slice(0, 5);
+
+    // Try to load saved data
+    loadFromLocal();
+    // After load, ensure BMI is calculated if fields are present
+    calculateBMI();
+
+    // Autosave Trigger: Debounced input listener
+    let timeout;
+    document.getElementById('admissionForm').addEventListener('input', () => {
+        clearTimeout(timeout);
+        timeout = setTimeout(saveToLocal, 1000); // Auto-save after 1s of inactivity
+    });
+
+    // Network Listeners
+    window.addEventListener('online', updateOnlineStatus);
+    window.addEventListener('offline', updateOnlineStatus);
+    updateOnlineStatus(); // Check on load
 });
 
 // UI: Expand/Collapse Sections
@@ -25,6 +160,7 @@ function toggleAllergyInput(checkbox) {
         detailInput.disabled = false;
         detailInput.focus();
     }
+    saveToLocal(); // Trigger save state
 }
 
 function toggleClexane(checkbox) {
@@ -40,11 +176,11 @@ function toggleClexane(checkbox) {
             tomorrow.setDate(tomorrow.getDate() + 1);
             dataInput.valueAsDate = tomorrow;
         }
-
         if (!horaInput.value) {
             horaInput.value = '18:00';
         }
     }
+    saveToLocal(); // Trigger save state
 }
 
 // Logic: BMI Calculation
@@ -61,6 +197,7 @@ function calculateBMI() {
         display.textContent = '-';
         display.classList.remove('highlight');
     }
+    // Note: No explicit save here as 'input' event on form handles it
 }
 
 // Logic: Generate Summary
@@ -89,7 +226,7 @@ function generateSummary() {
         idade: getValue('idade'),
         sexo: getValue('sexo'),
         equipe: getValue('equipe'),
-        peso: getValue('peso'), // Added peso for section1 logic
+        peso: getValue('peso'),
         altura: getValue('altura'),
         imc: document.getElementById('imc_display').textContent,
 
@@ -109,7 +246,7 @@ function generateSummary() {
         sds_med: getChecked('sds_med'),
         sds_outros: getValue('sds_outros'),
         transf: getValue('transfusao'),
-        bh_outros: getValue('bh_outros'), // Not used in example but available
+        bh_outros: getValue('bh_outros'),
 
         // History
         comorb_list: getChecked('comorb'),
@@ -123,7 +260,7 @@ function generateSummary() {
 
         // Other
         atb_nome: getValue('antibiotico'),
-        inv_list: getChecked('invasao').split(', ').filter(i => i), // Array
+        inv_list: getChecked('invasao').split(', ').filter(i => i),
         inv_pam: getValue('inv_pam_loc'),
         inv_pvp: getValue('inv_pvp_loc'),
         drenos: getValue('drenos'),
@@ -141,30 +278,17 @@ function generateSummary() {
     // --- BUILD TEXT ---
 
     // SECTION 1
-    // Nome placeholder
-    // Age
-    // Peso (if exists)
-    // MA: Equipe
     let section1 = `Nome,\n${data.idade} anos`;
-    if (data.peso) {
-        section1 += `\n${data.peso} kg`;
-    }
-    if (data.altura) {
-        section1 += `\n${data.altura} m`;
-    }
-    if (data.imc && data.imc !== '-') {
-        section1 += `\nIMC ${data.imc}`;
-    }
+    if (data.peso) section1 += `\n${data.peso} kg`;
+    if (data.altura) section1 += `\n${data.altura} m`;
+    if (data.imc && data.imc !== '-') section1 += `\nIMC ${data.imc}`;
     section1 += `\n\nMA: ${data.equipe}\n\n—---------------------------------`;
 
     // Antibiotic
     let antibioticLine = data.atb_nome ? `${data.data} ${data.atb_nome}` : '';
 
     // Invasions
-    // Map Invasions to "Date Item"
     let invasionsLines = [];
-
-    // Process known invasions with locals
     data.inv_list.forEach(inv => {
         let text = inv;
         if (inv === 'PAM' && data.inv_pam) text += ` (${data.inv_pam})`;
@@ -172,43 +296,28 @@ function generateSummary() {
         invasionsLines.push(`${data.data} ${text}`);
     });
 
-    // Drains
-    if (data.drenos) {
-        invasionsLines.push(`${data.data} ${data.drenos}`);
-    }
-    // CVD is in inv_list usually if checked, or separate? 
-    // In index.html CVD is a checkbox value="CVD" in 'invasao', so it's covered by inv_list.
-
-    section1 += antibioticLine ? `\n${antibioticLine}` : '';
+    if (data.drenos) invasionsLines.push(`${data.data} ${data.drenos}`);
+    if (antibioticLine) section1 += `\n${antibioticLine}`;
     if (invasionsLines.length > 0) section1 += `\n\n${invasionsLines.join('\n')}`;
 
-
     // SECTION 2
-    // Date PO Surgery (InfoPreOp)
     let surgeryLine = `${data.data} PO ${data.cirurgia}`;
     if (data.info_pre_op) surgeryLine += ` (${data.info_pre_op})`;
 
-    // IntraOp Details
-    // 05:00 CC / HV 1000ml / Anestesia ...
     let durationStr = '';
     if (data.duracao_h || data.duracao_min) {
         durationStr = `CC ${data.duracao_h || '0'}h`;
-        if (data.duracao_min && data.duracao_min !== '0' && data.duracao_min !== '00') {
-            durationStr += `${data.duracao_min}`;
-        }
+        if (data.duracao_min && data.duracao_min !== '0' && data.duracao_min !== '00') durationStr += `${data.duracao_min}`;
     }
 
-    // HV calculation
     let cristVol = parseInt(data.crist) || 0;
     let colVol = parseInt(data.col) || 0;
     let totalHV = cristVol + colVol;
-    let hvStr = totalHV > 0 ? `HV ${totalHV}ml` : ''; // Or separate if needed, example shows sum? "HV 1000ml"
+    let hvStr = totalHV > 0 ? `HV ${totalHV}ml` : '';
 
-    // Anesthesia
     let anestesiaStr = `Anestesia ${data.anestesia_tipo}`;
     if (data.anestesia_drogas) anestesiaStr += ` com ${data.anestesia_drogas}`;
 
-    // Meds Saida Sala
     let medsExit = [];
     if (data.sds_med) medsExit.push(data.sds_med);
     if (data.sds_outros) medsExit.push(data.sds_outros);
@@ -223,7 +332,6 @@ function generateSummary() {
         medsExitStr
     ].filter(s => s).join(' / ');
 
-    // Transfusions
     let transfLine = data.transf ? `Hemotransfusões: ${data.transf} ${data.data}` : '';
 
     let section2 = `${surgeryLine}\n${intraOpLine}`;
@@ -233,39 +341,20 @@ function generateSummary() {
     // History
     let comorbStr = data.comorb_list;
     if (data.comorb_outros) comorbStr += (comorbStr ? `; ${data.comorb_outros}` : data.comorb_outros);
-
     let section2Part2 = `HPP: ${comorbStr || 'Nega'}\n\nEm uso de: ${data.meds_hab || 'Nega'}`;
 
     // Allergy & Airway
     let allergyLine = data.alergias;
-
-    // Airway Logic
     let airwayBase = data.vad === 'Sim' ? 'VAD' : 'VA ok';
     let airwayLine = airwayBase;
-
-    if (data.cormack) {
-        airwayLine += ` - Cormack ${data.cormack}`;
-    }
-
+    if (data.cormack) airwayLine += ` - Cormack ${data.cormack}`;
     let disp = data.disp_iot === 'Videolaringo' ? 'VL' : data.disp_iot;
-    if (disp) {
-        // Use " - " separator or " com "? Example shows " - VL"
-        // Previous request: "VAD - Cormack II com VL + bougie"
-        // Current request example: "VA ok - VL + bougie"
-        // Let's use " - " as separator if Cormack is present, or append to base?
-        // Let's standardize on " - " for the device part to match the requested example
-        airwayLine += ` - ${disp}`;
-    }
-
-    if (data.bougie && data.bougie.includes('Sim')) {
-        airwayLine += ` + Bougie`;
-    }
+    if (disp) airwayLine += ` - ${disp}`;
+    if (data.bougie && data.bougie.includes('Sim')) airwayLine += ` + Bougie`;
 
     section2 += `\n${section2Part2}\n\n${allergyLine}\n${airwayLine}`;
 
-
-    // SECTION 3 - Checklist
-    // Logic for Dieta
+    // SECTION 3
     let dietCheck = '( )';
     let dietText = 'Dieta liberada?';
     if (data.dieta && data.dieta.includes('Liberada')) {
@@ -275,7 +364,6 @@ function generateSummary() {
         dietText += ` ${data.dieta}`;
     }
 
-    // Logic for Clexane/Heparin/Compressor
     let clexaneCheck = '( )';
     let clexaneText = 'Clexane?';
     if (data.clexane_check) {
@@ -288,7 +376,6 @@ function generateSummary() {
         clexaneText += ' não, CPMI';
     }
 
-    // Logic for Deambular
     let walkCheck = data.deambular === 'Sim' ? '(x)' : '( )';
 
     let section3 = `
@@ -307,8 +394,6 @@ ${walkCheck} deambular em 12h
 (  ) Parametrização na prescrição 
 (  ) Check Prontuario fisico`;
 
-    // Final Assembly
-    // Using explicit newlines for spacing as requested
     let summary = `${section1}\n\n\n\n${section2}\n\n\n${section3}`;
 
     document.getElementById('summaryText').textContent = summary.trim();
@@ -322,70 +407,53 @@ function closeModal() {
 function copyToClipboard() {
     const text = document.getElementById('summaryText').textContent;
     navigator.clipboard.writeText(text).then(() => {
-        const btn = document.querySelector('.modal-footer .btn-primary');
-        const original = btn.textContent;
-        btn.textContent = 'Copiado!';
-        btn.style.backgroundColor = '#10b981';
-        setTimeout(() => {
-            btn.textContent = original;
-            btn.style.backgroundColor = '';
-        }, 2000);
+        showToast('Texto copiado!', 'success');
+        // Close modal after short delay? Optional. 
+        // User might want to keep reading.
     });
 }
 
 function copyAndOpenDontpad() {
     const text = document.getElementById('summaryText').textContent;
     navigator.clipboard.writeText(text).then(() => {
-        const btn = document.getElementById('btnDontpad');
-        const original = btn.textContent;
-        btn.textContent = 'Colar no Dontpad';
-        btn.style.backgroundColor = '#10b981'; // Green for success
-
-        // Open in new tab
+        showToast('Copiado! Abrindo Dontpad...', 'success');
         window.open('http://dontpad.com/admissao_upo2026', '_blank');
-
-        setTimeout(() => {
-            btn.textContent = original;
-            btn.style.backgroundColor = '#3b82f6'; // Revert to original blue
-        }, 3000);
     });
 }
 
 function resetForm() {
-    if (confirm('Tem certeza que deseja limpar todos os dados?')) {
+    if (confirm('Tem certeza que deseja limpar todos os dados? Isso apagará o rascunho salvo.')) {
         document.getElementById('admissionForm').reset();
         calculateBMI();
+        localStorage.removeItem(STORAGE_KEY);
 
         // Reset defaults
         const now = new Date();
         document.getElementById('data_admissao').valueAsDate = now;
         document.getElementById('hora_admissao').value = now.toTimeString().slice(0, 5);
         document.getElementById('alergia_detalhe').disabled = false;
+
+        showToast('Formulário limpo', 'success');
     }
 }
 
 // Logic: Calendar Export
 function generateCalendarEvent() {
     const hours = prompt("Daqui a quantas horas você quer ser lembrado?", "2");
-    if (!hours) return; // Users cancelled
+    if (!hours) return;
 
     const now = new Date();
     const startDate = new Date(now.getTime() + (parseFloat(hours) * 60 * 60 * 1000));
-    const endDate = new Date(startDate.getTime() + (30 * 60 * 1000)); // 30 min duration
+    const endDate = new Date(startDate.getTime() + (30 * 60 * 1000));
 
     const formatDate = (date) => {
         return date.toISOString().replace(/-|:|\.\d+/g, '');
     };
 
-    const name = document.getElementById('section1').innerText.split('\n')[0] || 'Paciente UPO'; // Rough guess or generic
-    // Better:
-    const dataAdmissao = document.getElementById('data_admissao').value;
     const summary = document.getElementById('summaryText').textContent;
-
     const title = `Revisar Paciente (UPO)`;
     const description = `Lembrete de revisão.\n\n${summary}`;
 
-    // Build ICS content
     const icsContent = [
         'BEGIN:VCALENDAR',
         'VERSION:2.0',
@@ -401,7 +469,6 @@ function generateCalendarEvent() {
         'END:VCALENDAR'
     ].join('\r\n');
 
-    // Create Download Link
     const blob = new Blob([icsContent], { type: 'text/calendar;charset=utf-8' });
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
@@ -410,4 +477,6 @@ function generateCalendarEvent() {
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+
+    showToast('Lembrete criado!', 'success');
 }

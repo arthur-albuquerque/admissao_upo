@@ -1,13 +1,20 @@
 :root {
   /* Color Palette - Premium Medical */
-  --primary-color: #0284c7; /* Sky 600 */
-  --primary-hover: #0369a1; /* Sky 700 */
-  --secondary-color: #64748b; /* Slate 500 */
-  --background-color: #f8fafc; /* Slate 50 */
+  --primary-color: #0284c7;
+  /* Sky 600 */
+  --primary-hover: #0369a1;
+  /* Sky 700 */
+  --secondary-color: #64748b;
+  /* Slate 500 */
+  --background-color: #f8fafc;
+  /* Slate 50 */
   --card-background: #ffffff;
-  --text-main: #0f172a; /* Slate 900 */
-  --text-muted: #475569; /* Slate 600 */
-  --border-color: #e2e8f0; /* Slate 200 */
+  --text-main: #0f172a;
+  /* Slate 900 */
+  --text-muted: #475569;
+  /* Slate 600 */
+  --border-color: #e2e8f0;
+  /* Slate 200 */
   --success-color: #10b981;
   --danger-color: #ef4444;
   --warning-color: #f59e0b;
@@ -15,8 +22,8 @@
   /* Spacing & Radius */
   --radius-md: 12px;
   --radius-lg: 16px;
-  --shadow-sm: 0 1px 3px rgba(0,0,0,0.05);
-  --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.05);
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
   --font-family: 'Inter', system-ui, -apple-system, sans-serif;
 }
 
@@ -140,7 +147,8 @@ textarea {
   border: 1px solid var(--border-color);
   background: var(--card-background);
   color: var(--text-main);
-  font-size: 1rem; /* Prevent zoom on mobile */
+  font-size: 1rem;
+  /* Prevent zoom on mobile */
   transition: all 0.2s;
   outline: none;
 }
@@ -166,13 +174,15 @@ textarea:focus {
 }
 
 /* Checkbox & Radio Groups */
-.checkbox-group, .radio-group {
+.checkbox-group,
+.radio-group {
   display: flex;
   flex-wrap: wrap;
   gap: 12px;
 }
 
-.checkbox-label, .radio-label {
+.checkbox-label,
+.radio-label {
   display: flex;
   align-items: center;
   gap: 8px;
@@ -185,17 +195,20 @@ textarea:focus {
   transition: all 0.2s;
 }
 
-.checkbox-label:hover, .radio-label:hover {
+.checkbox-label:hover,
+.radio-label:hover {
   background-color: var(--background-color);
 }
 
-.checkbox-label input, .radio-label input {
+.checkbox-label input,
+.radio-label input {
   accent-color: var(--primary-color);
   width: 18px;
   height: 18px;
 }
 
-.checkbox-label:has(input:checked), .radio-label:has(input:checked) {
+.checkbox-label:has(input:checked),
+.radio-label:has(input:checked) {
   border-color: var(--primary-color);
   background-color: rgba(2, 132, 199, 0.05);
 }
@@ -263,7 +276,7 @@ textarea:focus {
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0,0,0,0.5);
+  background: rgba(0, 0, 0, 0.5);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -287,7 +300,7 @@ textarea:focus {
   max-height: 80vh;
   display: flex;
   flex-direction: column;
-  box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
 }
 
 .modal-header {
@@ -325,10 +338,138 @@ textarea:focus {
   display: none !important;
 }
 
-.text-danger { color: var(--danger-color); }
-.text-success { color: var(--success-color); }
+.text-danger {
+  color: var(--danger-color);
+}
+
+.text-success {
+  color: var(--success-color);
+}
 
 textarea.auto-grow {
   min-height: 80px;
   resize: vertical;
+}
+
+/* --- New Additions for UX --- */
+
+/* Notification Toast */
+.toast-container {
+  position: fixed;
+  bottom: 80px;
+  /* Above action bar */
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 200;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  pointer-events: none;
+}
+
+.toast {
+  background: rgba(15, 23, 42, 0.9);
+  color: white;
+  padding: 12px 24px;
+  border-radius: 50px;
+  font-size: 0.95rem;
+  font-weight: 500;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  opacity: 0;
+  transform: translateY(20px);
+  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  pointer-events: none;
+}
+
+.toast.show {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.toast.success {
+  background: #10b981;
+}
+
+.toast.error {
+  background: #ef4444;
+}
+
+.toast.warning {
+  background: #f59e0b;
+}
+
+/* Offline Badge */
+.offline-badge {
+  position: fixed;
+  top: 10px;
+  right: 10px;
+  background: #ef4444;
+  color: white;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  box-shadow: 0 2px 8px rgba(239, 68, 68, 0.4);
+  z-index: 300;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transform: translateY(-50px);
+  transition: transform 0.3s ease;
+}
+
+.offline-badge.visible {
+  transform: translateY(0);
+}
+
+/* Mobile Touch Target Improvements */
+@media (max-width: 600px) {
+  .btn {
+    padding: 16px;
+    font-size: 1.05rem;
+  }
+
+  .checkbox-label,
+  .radio-label {
+    padding: 12px;
+    /* Bigger touch area */
+  }
+
+  input[type="checkbox"],
+  input[type="radio"] {
+    transform: scale(1.2);
+    /* Slightly larger inputs */
+  }
+
+  .action-bar {
+    bottom: 0;
+    padding: 16px;
+    background: linear-gradient(to top, var(--background-color) 80%, transparent);
+  }
+}
+
+/* Modal Polish */
+.modal-overlay {
+  backdrop-filter: blur(4px);
+  background: rgba(0, 0, 0, 0.4);
+}
+
+.modal {
+  border: 1px solid var(--border-color);
+  animation: modalPop 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+@keyframes modalPop {
+  0% {
+    transform: scale(0.95);
+    opacity: 0;
+  }
+
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
 }
