@@ -142,12 +142,19 @@ input[type="time"],
 select,
 textarea {
   width: 100%;
-  padding: 12px 14px;
+  padding: 10px 12px;
+  /* Slightly more compact */
+  min-height: 44px;
+  /* Consistent height */
   border-radius: var(--radius-md);
   border: 1px solid var(--border-color);
   background: var(--card-background);
   color: var(--text-main);
   font-size: 1rem;
+  font-family: inherit;
+  appearance: none;
+  /* Better mobile rendering */
+  -webkit-appearance: none;
   /* Prevent zoom on mobile */
   transition: all 0.2s;
   outline: none;
@@ -169,8 +176,14 @@ textarea:focus {
 
 .grid-3 {
   display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
-  gap: 12px;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+
+/* Fix grid items from pushing outside container */
+.grid-2>*,
+.grid-3>* {
+  min-width: 0;
 }
 
 /* Checkbox & Radio Groups */
