@@ -279,11 +279,11 @@ function generateClinicalSummary() {
         let text = inv;
         if (inv === 'TOT') {
             const vad = data.clin_vad || 'Não inf.';
-            text += ` (VAD: ${vad})`;
+            text += ` VAD: ${vad}`;
         } else if (inv === 'PVP' && data.clin_pvp_loc) {
-            text += ` (${data.clin_pvp_loc})`;
+            text += ` ${data.clin_pvp_loc}`;
         } else if (inv === 'PAM' && data.clin_pam_loc) {
-            text += ` (${data.clin_pam_loc})`;
+            text += ` ${data.clin_pam_loc}`;
         }
         invasionStrings.push(text);
     });
@@ -291,7 +291,7 @@ function generateClinicalSummary() {
     let invStr = invasionStrings.join(', ') || 'Nenhuma';
 
     const summary = `*ADMISSÃO CLÍNICA*\n` +
-        `Data: ${dateFormatted} | Leito: ${leito} | Hora: ${hora}\n` +
+        `${leito} | ${dateFormatted} | ${hora}\n` +
         `—----------------------------------\n` +
         `INSTABILIDADE:\n${instStr}\n` +
         `—----------------------------------\n` +
@@ -497,7 +497,7 @@ function generateSummary() {
     if (data.peso) section1 += `\n${data.peso} kg`;
     if (data.altura) section1 += `\n${data.altura} m`;
     if (data.imc && data.imc !== '-') section1 += `\nIMC ${data.imc}`;
-    section1 += `\n\nMA: ${data.equipe}\n\n—---------------------------------`;
+    section1 += `\n\nEquipe: ${data.equipe}\n\n—---------------------------------`;
 
 
     // Instability String
@@ -519,8 +519,8 @@ function generateSummary() {
     let invasionsLines = [];
     data.inv_list.forEach(inv => {
         let text = inv;
-        if (inv === 'PAM' && data.inv_pam) text += ` (${data.inv_pam})`;
-        if (inv === 'PVP' && data.inv_pvp) text += ` (${data.inv_pvp})`;
+        if (inv === 'PAM' && data.inv_pam) text += ` ${data.inv_pam}`;
+        if (inv === 'PVP' && data.inv_pvp) text += ` ${data.inv_pvp}`;
         invasionsLines.push(`${data.data} ${text}`);
     });
 
@@ -553,12 +553,13 @@ function generateSummary() {
 
     let intraOpLine = [
         durationStr,
-        hvStr,
+        `Cristaloide: ${data.crist || '0'}ml`,
+        `Coloide: ${data.col || '0'}ml`,
+        `Sangramento: ${data.sang || '-'}`,
+        `Diurese: ${data.diu || '-'}`,
         anestesiaStr,
-        `Sangramento ${data.sang || '-'}`,
-        `Diurese ${data.diu || '-'}`,
         medsExitStr
-    ].filter(s => s).join(' / ');
+    ].filter(s => s).join('\n');
 
     let transfLine = data.transf ? `Hemotransfusões: ${data.transf} ${data.data}` : '';
 
