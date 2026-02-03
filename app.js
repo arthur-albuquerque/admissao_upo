@@ -554,31 +554,44 @@ function generateSummary() {
 
     // SECTION 1
     let section1 = `Nome,\n${data.idade} anos`;
-    if (data.leito) section1 += ` | Leito ${data.leito}`;
+    // if (data.leito) section1 += ` | Leito ${data.leito}`; // Removed per request
     if (data.peso) section1 += `\n${data.peso} kg`;
     if (data.altura) section1 += `\n${data.altura} m`;
     if (data.imc && data.imc !== '-') section1 += `\nIMC ${data.imc}`;
     section1 += `\n\nMA: ${data.equipe}\n\n—---------------------------------`;
 
 
-    // Instability String - New Format
-    const instLines = [];
+    // Instability String - New Format (Positives first, then Negatives)
+    const positives = [];
+    const negatives = [];
+
     const formatInst = (val, label) => {
         if (val === 'Não') return `+ ${label} ok`;
         if (val === 'Sim') {
             if (label.toLowerCase() === 'dor forte') return `- Dor forte`;
             return `- Instabilidade ${label.toLowerCase()}`;
         }
-        return `? ${label}: -`;
+        return null;
     };
 
-    instLines.push(formatInst(data.inst_neuro, 'Neurológico'));
-    instLines.push(formatInst(data.inst_vent, 'Ventilatório'));
-    instLines.push('');
-    instLines.push(formatInst(data.inst_hemo, 'Hemodinâmica'));
-    instLines.push(formatInst(data.inst_dor, 'Dor forte'));
+    const items = [
+        { val: data.inst_hemo, label: 'Hemodinâmica' },
+        { val: data.inst_neuro, label: 'Neurológico' },
+        { val: data.inst_vent, label: 'Ventilatório' },
+        { val: data.inst_dor, label: 'Dor forte' }
+    ];
 
-    const instStr = instLines.join('\n');
+    items.forEach(item => {
+        const res = formatInst(item.val, item.label);
+        if (res) {
+            if (res.startsWith('+')) positives.push(res);
+            else negatives.push(res);
+        }
+    });
+
+    let instStr = positives.join('\n');
+    if (positives.length > 0 && negatives.length > 0) instStr += '\n\n';
+    instStr += negatives.join('\n');
 
     // (Existing building logic for sections...)
     // I need to make sure I don't break the existing code flow.
@@ -632,7 +645,11 @@ function generateSummary() {
         medsExitStr
     ].filter(s => s).join(' / ');
 
-    let transfLine = data.transf ? `Hemotransfusões: ${data.transf} ${data.data}` : '';
+    let formattedTransf = data.transf;
+    if (formattedTransf && !isNaN(formattedTransf) && parseInt(formattedTransf) < 10 && formattedTransf.length === 1) {
+        formattedTransf = `0${formattedTransf}`;
+    }
+    let transfLine = data.transf ? `Hemotransfusões: ${formattedTransf} ${data.data}` : '';
 
     let section2 = `${surgeryLine}\n${intraOpLine}`;
     if (transfLine) section2 += `\n\n${transfLine}`;
@@ -679,22 +696,22 @@ function generateSummary() {
     let walkCheck = data.deambular === 'Sim' ? '(x)' : '( )';
 
     let section3 = `
-(  ) Admissão
-(  ) Prescrição
-(  ) Rx agora
-(  ) Lab agora
-(  ) Lab rotina 
-${dietCheck} ${dietText}
-${clexaneCheck} ${clexaneText}
-${walkCheck} deambular em 12h
+( ) Admissão
+( ) Prescrição
+( ) Rx agora
+( ) Lab agora
+( ) Lab rotina 
+${dietCheck.replace('(x)', '(x)').replace('( )', '( )')} ${dietText}
+${clexaneCheck.replace('(x)', '(x)').replace('( )', '( )')} ${clexaneText}
+${walkCheck.replace('(x)', '(x)').replace('( )', '( )')} deambular em 12h
 (x) Checar reconciliação
-(  ) Nome do familiar / acompanhante
-(  ) Coletar TCI
-(  ) Protocolo de TEV
-(  ) Parametrização na prescrição 
-(  ) Check Prontuario fisico`;
+( ) Nome do familiar / acompanhante
+( ) Coletar TCI
+( ) Protocolo de TEV
+( ) Parametrização na prescrição 
+( ) Check Prontuario fisico`;
 
-    let summary = `${section1}\n\n\nINSTABILIDADE:\n${instStr}\n\n—---------------------------------\n${section2}\n\nOrientações:\n${section3}`;
+    let summary = `${section1}\n\n\n${section2}\n\n\n\nINSTABILIDADES:\n\n\n${instStr}\n\n\n\nOrientações:\n${section3}`;
 
     document.getElementById('summaryText').textContent = summary.trim();
     document.getElementById('summaryModal').classList.add('open');
