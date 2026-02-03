@@ -381,9 +381,24 @@ function generateClinicalSummary() {
         invasionStrings.push(itemWithDate);
     });
 
-    let invStr = invasionStrings.join('\n') || 'Nenhuma invasão';
+    const section3 = `
+Orientações:
 
-    const summary = `${leito}\n\n\n${instStr}\n\n\n${invStr}`;
+( ) Admissão
+( ) Prescrição
+( ) Rx agora
+( ) Lab agora
+( ) Lab rotina 
+( ) Dieta liberada?
+( ) Clexane?
+( ) Checar reconciliação
+( ) Nome do familiar / acompanhante
+( ) Coletar TCI
+( ) Protocolo de TEV
+( ) Parametrização na prescrição 
+( ) Check Prontuario fisico`;
+
+    const summary = `${leito}\n\n\n${instStr}\n\n\n${invStr}\n\n\n${section3}`;
 
     document.getElementById('summaryText').textContent = summary.trim();
 
