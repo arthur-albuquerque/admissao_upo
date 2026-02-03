@@ -38,7 +38,6 @@ function saveToLocal() {
     data._last_saved = new Date().toISOString();
 
     localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-    showToast('Rascunho salvo', 'success');
 }
 
 function loadFromLocal() {
