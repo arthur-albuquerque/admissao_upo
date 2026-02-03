@@ -543,7 +543,8 @@ textarea.auto-grow {
 
 /* Primary Cards (ACL / ACC) - Big & Blue */
 .dashboard-card.primary {
-  background: var(--primary-color);
+  background: #006296;
+  /* Darker blue for contrast */
   color: white;
   border: none;
   width: 48%;
@@ -553,7 +554,7 @@ textarea.auto-grow {
 
 .dashboard-card.primary h3 {
   color: white;
-  font-size: 1.1rem;
+  font-size: 1.4rem;
   margin-bottom: 4px;
 }
 
