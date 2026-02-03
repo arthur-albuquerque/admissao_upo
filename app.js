@@ -4,24 +4,37 @@
 const STORAGE_KEY = 'upo_admission_form_data';
 
 function saveToLocal() {
-    const formData = new FormData(document.getElementById('admissionForm'));
     const data = {};
-    for (const [key, value] of formData.entries()) {
-        // Handle multi-value checkboxes (arrays)
-        if (data[key]) {
-            if (!Array.isArray(data[key])) {
-                data[key] = [data[key]];
+
+    // Helper to extract form data
+    const extractFormData = (formId) => {
+        const form = document.getElementById(formId);
+        if (!form) return;
+        const formData = new FormData(form);
+        for (const [key, value] of formData.entries()) {
+            if (data[key]) {
+                if (!Array.isArray(data[key])) data[key] = [data[key]];
+                data[key].push(value);
+            } else {
+                data[key] = value;
             }
-            data[key].push(value);
-        } else {
-            data[key] = value;
         }
-    }
+    };
+
+    extractFormData('admissionForm');
+    extractFormData('clinicalForm');
 
     // Also save specific UI states that aren't inputs
-    data._ui_clexane = document.getElementById('check_clexane').checked;
-    data._ui_nega_alergia = document.getElementById('nega_alergia').checked;
-    data._ui_imc = document.getElementById('imc_display').textContent;
+    const checkClexane = document.getElementById('check_clexane');
+    const negaAlergia = document.getElementById('nega_alergia');
+    const imcDisplay = document.getElementById('imc_display');
+    const checkTot = document.getElementById('check_tot');
+
+    if (checkClexane) data._ui_clexane = checkClexane.checked;
+    if (negaAlergia) data._ui_nega_alergia = negaAlergia.checked;
+    if (imcDisplay) data._ui_imc = imcDisplay.textContent;
+    if (checkTot) data._ui_tot = checkTot.checked;
+
     data._last_saved = new Date().toISOString();
 
     localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
@@ -36,52 +49,81 @@ function loadFromLocal() {
         const data = JSON.parse(raw);
         console.log('Restoring data from', data._last_saved);
 
-        // Inputs
-        const form = document.getElementById('admissionForm');
-        Object.keys(data).forEach(key => {
-            if (key.startsWith('_ui_')) return;
+        const forms = ['admissionForm', 'clinicalForm'];
+        forms.forEach(formId => {
+            const form = document.getElementById(formId);
+            if (!form) return;
 
-            const input = form.elements[key];
-            if (!input) return;
+            Object.keys(data).forEach(key => {
+                if (key.startsWith('_ui_')) return;
 
-            // Handle Checkboxes/Radios vs Text
-            if (input instanceof RadioNodeList || (input.length > 1 && input[0].type !== 'select-one')) {
-                // Radio or Checkbox Group
-                const values = Array.isArray(data[key]) ? data[key] : [data[key]];
-                Array.from(input).forEach(radio => {
-                    if (values.includes(radio.value)) {
-                        radio.checked = true;
-                    }
-                });
-            } else if (input.type === 'checkbox') {
-                input.checked = !!data[key]; // Single checkbox logic if any (rare here)
-            } else {
-                input.value = data[key];
-            }
+                const input = form.elements[key];
+                if (!input) return;
+
+                // Handle Checkboxes/Radios vs Text
+                if (input instanceof RadioNodeList || (input.length > 1 && input[0].type !== 'select-one')) {
+                    const values = Array.isArray(data[key]) ? data[key] : [data[key]];
+                    Array.from(input).forEach(radio => {
+                        if (values.includes(radio.value)) {
+                            radio.checked = true;
+                        }
+                    });
+                } else if (input.type === 'checkbox') {
+                    input.checked = !!data[key];
+                } else {
+                    input.value = data[key];
+                }
+            });
         });
 
-        // UI Specifics
+        // UI Specifics - Surgical
         if (data._ui_clexane) {
-            document.getElementById('check_clexane').checked = true;
-            toggleClexane(document.getElementById('check_clexane'));
+            const el = document.getElementById('check_clexane');
+            if (el) {
+                el.checked = true;
+                toggleClexane(el);
+            }
         }
         if (data._ui_nega_alergia) {
-            document.getElementById('nega_alergia').checked = true;
-            toggleAllergyInput(document.getElementById('nega_alergia'));
+            const el = document.getElementById('nega_alergia');
+            if (el) {
+                el.checked = true;
+                toggleAllergyInput(el);
+            }
         }
         if (data._ui_imc) {
             const disp = document.getElementById('imc_display');
-            disp.textContent = data._ui_imc;
-            if (data._ui_imc !== '-') disp.classList.add('highlight');
+            if (disp) {
+                disp.textContent = data._ui_imc;
+                if (data._ui_imc !== '-') disp.classList.add('highlight');
+            }
         }
 
-        // Section Headers - Auto expand if data present? 
-        // Optional: keep them collapsed for visual clarity.
+        // UI Specifics - Clinical
+        if (data._ui_tot) {
+            const el = document.getElementById('check_tot');
+            if (el) {
+                el.checked = true;
+                toggleVAD(el);
+            }
+        }
 
     } catch (e) {
         console.error('Error loading save', e);
     }
 }
+
+// --- Clinical Specific ---
+function toggleVAD(checkbox) {
+    const vadDiv = document.getElementById('vad_selection');
+    if (checkbox.checked) {
+        vadDiv.classList.remove('hidden');
+    } else {
+        vadDiv.classList.add('hidden');
+        document.getElementsByName('clin_vad').forEach(r => r.checked = false);
+    }
+}
+window.toggleVAD = toggleVAD;
 
 // --- Toast System ---
 function showToast(message, type = 'success') {
@@ -134,12 +176,19 @@ function navigateTo(viewId) {
 function resumeSession() {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (raw) {
-        // We have data! Go to surgical view and load it.
-        // In the future, we might check a 'type' field in the JSON to decide which view to open.
-        // For now, it's always Surgical.
-        navigateTo('view-surgical');
-        loadFromLocal();
-        showToast('Sessão restaurada', 'success');
+        try {
+            const data = JSON.parse(raw);
+            // Decide which view to open based on available data
+            if (data.clin_leito || data.clin_hora || data.inst_neuro) {
+                navigateTo('view-clinical');
+            } else {
+                navigateTo('view-surgical');
+            }
+            loadFromLocal();
+            showToast('Sessão restaurada', 'success');
+        } catch (e) {
+            showToast('Erro ao carregar rascunho', 'error');
+        }
     } else {
         showToast('Nenhum rascunho encontrado', 'warning');
     }
@@ -149,34 +198,78 @@ function resumeSession() {
 window.navigateTo = navigateTo;
 window.resumeSession = resumeSession;
 
+function generateClinicalSummary() {
+    const form = document.getElementById('clinicalForm');
+    const formData = new FormData(form);
+    const data = {};
+    for (const [key, value] of formData.entries()) {
+        if (data[key]) {
+            if (!Array.isArray(data[key])) data[key] = [data[key]];
+            data[key].push(value);
+        } else {
+            data[key] = value;
+        }
+    }
+
+    const leito = data.clin_leito || 'N/I';
+    const hora = data.clin_hora || '--:--';
+
+    // Instabilities
+    const instStr = [
+        `Neurológica: ${data.inst_neuro || '-'}`,
+        `Hemodinâmica: ${data.inst_hemo || '-'}`,
+        `Ventilatória: ${data.inst_vent || '-'}`,
+        `Dor Forte: ${data.inst_dor || '-'}`
+    ].join(' | ');
+
+    // Invasions
+    let invList = Array.isArray(data.clin_invasao) ? data.clin_invasao : (data.clin_invasao ? [data.clin_invasao] : []);
+    let invStr = invList.join(', ') || 'Nenhuma';
+
+    if (invList.includes('TOT')) {
+        const vad = data.clin_vad || 'Não informado';
+        invStr += ` (VAD: ${vad})`;
+    }
+
+    const summary = `*ADMISSÃO CLÍNICA*\n` +
+        `Leito: ${leito} | Hora: ${hora}\n` +
+        `—----------------------------------\n` +
+        `INSTABILIDADE:\n${instStr}\n` +
+        `—----------------------------------\n` +
+        `INVASÕES: ${invStr}\n`;
+
+    document.getElementById('summaryText').textContent = summary.trim();
+    document.getElementById('summaryModal').classList.add('open');
+}
+window.generateClinicalSummary = generateClinicalSummary;
+
 // --- Initialization ---
 document.addEventListener('DOMContentLoaded', () => {
     // Default to Home View
     navigateTo('view-home');
 
-    // Set default date/time to now if empty (loadFromLocal might overwrite)
+    // Set default date/time for Surgical
     const now = new Date();
-    document.getElementById('data_admissao').valueAsDate = now;
-    document.getElementById('hora_admissao').value = now.toTimeString().slice(0, 5);
+    const dataAdm = document.getElementById('data_admissao');
+    const horaAdm = document.getElementById('hora_admissao');
+    if (dataAdm) dataAdm.valueAsDate = now;
+    if (horaAdm) horaAdm.value = now.toTimeString().slice(0, 5);
 
-    // Note: We do NOT auto-loadFromLocal() anymore on page load.
-    // The user must click "Abrir Anterior" or "Admissão Cirúrgica" (which could start fresh).
-    // Actually, "Admissão Cirúrgica" button just goes to view. Use logic below:
-
-    // If user clicks "Sirúrgica" button, we might want to CLEAR previous data or KEEP it?
-    // "Abrir Anterior" implies resuming. "Admissão Cirúrgica" implies new?
-    // Let's make "Admissão Cirúrgica" start fresh by default? Or keep draft?
-    // User requested "Abrir Anterior" specifically. 
-    // So "Admissão Cirúrgica" should arguably behave like "New".
-    // But for safety, we won't auto-clear unless they explicitly hit "Limpar".
-    // effectively, clicking "Cirurgica" takes you to the form. If there was data there, it's there.
-    // Let's treat "Abrir Anterior" as "Go to form AND ensure data is loaded".
+    // Set default time for Clinical
+    const clinHora = document.getElementById('clin_hora');
+    if (clinHora) clinHora.value = now.toTimeString().slice(0, 5);
 
     // Autosave Trigger: Debounced input listener
     let timeout;
-    document.getElementById('admissionForm').addEventListener('input', () => {
+    const saveHandler = () => {
         clearTimeout(timeout);
         timeout = setTimeout(saveToLocal, 1000); // Auto-save after 1s of inactivity
+    };
+
+    const forms = ['admissionForm', 'clinicalForm'];
+    forms.forEach(id => {
+        const f = document.getElementById(id);
+        if (f) f.addEventListener('input', saveHandler);
     });
 
     // Network Listeners
@@ -474,17 +567,23 @@ function copyAndOpenDontpad() {
     });
 }
 
-function resetForm() {
-    if (confirm('Tem certeza que deseja limpar todos os dados? Isso apagará o rascunho salvo.')) {
-        document.getElementById('admissionForm').reset();
-        calculateBMI();
+function resetForm(formId = 'admissionForm') {
+    if (confirm('Tem certeza que deseja limpar os dados deste formulário? Isso também removerá o rascunho salvo.')) {
+        const form = document.getElementById(formId);
+        if (form) form.reset();
+
         localStorage.removeItem(STORAGE_KEY);
 
-        // Reset defaults
         const now = new Date();
-        document.getElementById('data_admissao').valueAsDate = now;
-        document.getElementById('hora_admissao').value = now.toTimeString().slice(0, 5);
-        document.getElementById('alergia_detalhe').disabled = false;
+        if (formId === 'admissionForm') {
+            document.getElementById('data_admissao').valueAsDate = now;
+            document.getElementById('hora_admissao').value = now.toTimeString().slice(0, 5);
+            document.getElementById('alergia_detalhe').disabled = false;
+            calculateBMI();
+        } else if (formId === 'clinicalForm') {
+            document.getElementById('clin_hora').value = now.toTimeString().slice(0, 5);
+            document.getElementById('vad_selection').classList.add('hidden');
+        }
 
         showToast('Formulário limpo', 'success');
     }

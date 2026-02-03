@@ -42,7 +42,7 @@
             </header>
 
             <div class="dashboard-grid">
-                <div class="card dashboard-card" onclick="alert('Em breve!')">
+                <div class="card dashboard-card" onclick="navigateTo('view-clinical')">
                     <div class="card-icon">🩺</div>
                     <h3>Admissão Clínica</h3>
                     <p>Paciente clínico</p>
@@ -66,6 +66,124 @@
                     <p>Continuar rascunho</p>
                 </div>
             </div>
+        </div>
+
+        <!-- View: Clinical Admission -->
+        <div id="view-clinical" class="view hidden">
+            <header>
+                <button type="button" class="btn-back" onclick="navigateTo('view-home')">← Voltar</button>
+                <h1>Admissão Clínica</h1>
+                <p>Paciente do pronto atendimento / enfermaria</p>
+            </header>
+
+            <form id="clinicalForm">
+                <!-- 1. IDENTIFICAÇÃO -->
+                <div class="card">
+                    <div class="section-header">
+                        <span class="section-title">1. Identificação</span>
+                    </div>
+                    <div class="section-content">
+                        <div class="grid-2">
+                            <div class="form-group">
+                                <label>Leito</label>
+                                <input type="text" id="clin_leito" name="clin_leito" placeholder="Ex: 101-A">
+                            </div>
+                            <div class="form-group">
+                                <label>Horário</label>
+                                <input type="time" id="clin_hora" name="clin_hora">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 2. HÁ INSTABILIDADE? -->
+                <div class="card">
+                    <div class="section-header">
+                        <span class="section-title">2. Há Instabilidade?</span>
+                    </div>
+                    <div class="section-content">
+                        <p class="mb-2 text-light" style="font-size: 0.85rem;">Selecione uma opção para cada item:</p>
+                        <div class="instability-grid">
+                            <div class="instability-item">
+                                <label>Neurológica</label>
+                                <div class="radio-group-horizontal">
+                                    <label class="radio-label"><input type="radio" name="inst_neuro" value="Não">
+                                        Não</label>
+                                    <label class="radio-label"><input type="radio" name="inst_neuro" value="Sim">
+                                        Sim</label>
+                                </div>
+                            </div>
+                            <div class="instability-item">
+                                <label>Hemodinâmica</label>
+                                <div class="radio-group-horizontal">
+                                    <label class="radio-label"><input type="radio" name="inst_hemo" value="Não">
+                                        Não</label>
+                                    <label class="radio-label"><input type="radio" name="inst_hemo" value="Sim">
+                                        Sim</label>
+                                </div>
+                            </div>
+                            <div class="instability-item">
+                                <label>Ventilatória</label>
+                                <div class="radio-group-horizontal">
+                                    <label class="radio-label"><input type="radio" name="inst_vent" value="Não">
+                                        Não</label>
+                                    <label class="radio-label"><input type="radio" name="inst_vent" value="Sim">
+                                        Sim</label>
+                                </div>
+                            </div>
+                            <div class="instability-item">
+                                <label>Dor Forte</label>
+                                <div class="radio-group-horizontal">
+                                    <label class="radio-label"><input type="radio" name="inst_dor" value="Não">
+                                        Não</label>
+                                    <label class="radio-label"><input type="radio" name="inst_dor" value="Sim">
+                                        Sim</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 3. INVASÕES -->
+                <div class="card">
+                    <div class="section-header">
+                        <span class="section-title">3. Invasões</span>
+                    </div>
+                    <div class="section-content">
+                        <div class="checkbox-group">
+                            <label class="checkbox-label"><input type="checkbox" name="clin_invasao" value="AVP">
+                                AVP</label>
+                            <label class="checkbox-label"><input type="checkbox" name="clin_invasao" value="PVP">
+                                PVP</label>
+                            <label class="checkbox-label"><input type="checkbox" name="clin_invasao" value="PAM">
+                                PAM</label>
+                            <label class="checkbox-label"><input type="checkbox" name="clin_invasao" value="CVD">
+                                CVD</label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="check_tot" name="clin_invasao" value="TOT"
+                                    onchange="toggleVAD(this)"> TOT
+                            </label>
+                            <label class="checkbox-label"><input type="checkbox" name="clin_invasao" value="Dreno">
+                                Dreno</label>
+                        </div>
+
+                        <!-- VAD Option (Hidden by default) -->
+                        <div id="vad_selection" class="form-group hidden mt-2">
+                            <label>Dificuldade na via aérea (VAD)?</label>
+                            <div class="radio-group-horizontal">
+                                <label class="radio-label"><input type="radio" name="clin_vad" value="Não"> Não</label>
+                                <label class="radio-label"><input type="radio" name="clin_vad" value="Sim"> Sim</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="action-bar" style="position: static; margin-top: 24px;">
+                    <button type="button" class="btn btn-secondary" onclick="resetForm('clinicalForm')">Limpar</button>
+                    <button type="button" class="btn btn-primary" onclick="generateClinicalSummary()">Gerar
+                        Resumo</button>
+                </div>
+            </form>
         </div>
 
         <!-- View: Surgical Admission (Existing Form) -->
