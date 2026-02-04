@@ -101,6 +101,30 @@
                                 <input type="time" id="clin_hora" name="clin_hora">
                             </div>
                         </div>
+
+                        <!-- Dados Clínicos Extras -->
+                        <div class="form-group" style="margin-top: 16px;">
+                            <label>Alergias</label>
+                            <div class="checkbox-group">
+                                <label class="checkbox-label">
+                                    <input type="checkbox" id="clin_nega_alergia" onchange="toggleClinAllergy(this)">
+                                    Nega Alergias
+                                </label>
+                            </div>
+                            <input type="text" id="clin_alergia_detalhe" name="clin_alergia_detalhe"
+                                placeholder="Se sim, quais?" class="mt-2">
+                        </div>
+
+                        <div class="form-group">
+                            <label>Medicações Habituais</label>
+                            <div class="checkbox-group">
+                                <label class="checkbox-label">
+                                    <input type="checkbox" id="clin_nega_meds" onchange="toggleClinMeds(this)"> Nego uso
+                                </label>
+                            </div>
+                            <textarea id="clin_meds_habituais" name="clin_meds_habituais" rows="2"
+                                placeholder="Listar medicações em uso..." class="mt-2"></textarea>
+                        </div>
                     </div>
                 </div>
 
@@ -425,8 +449,13 @@
 
                         <div class="form-group">
                             <label>Medicações Habituais</label>
+                            <div class="checkbox-group">
+                                <label class="checkbox-label">
+                                    <input type="checkbox" id="surg_nega_meds" onchange="toggleSurgMeds(this)"> Nego uso
+                                </label>
+                            </div>
                             <textarea id="meds_habituais" name="meds_habituais" rows="2"
-                                placeholder="Listar medicações em uso..."></textarea>
+                                placeholder="Listar medicações em uso..." class="mt-2"></textarea>
                         </div>
                     </div>
                 </div>

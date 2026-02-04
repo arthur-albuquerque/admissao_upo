@@ -58,6 +58,15 @@ function saveToLocal() {
     if (checkPvp) data._ui_pvp = checkPvp.checked;
     if (checkPam) data._ui_pam = checkPam.checked;
 
+    // New UI States
+    const clinNegaAlergia = document.getElementById('clin_nega_alergia');
+    const clinNegaMeds = document.getElementById('clin_nega_meds');
+    const surgNegaMeds = document.getElementById('surg_nega_meds');
+
+    if (clinNegaAlergia) data._ui_clin_nega_alergia = clinNegaAlergia.checked;
+    if (clinNegaMeds) data._ui_clin_nega_meds = clinNegaMeds.checked;
+    if (surgNegaMeds) data._ui_surg_nega_meds = surgNegaMeds.checked;
+
     data._last_saved = new Date().toISOString();
 
     localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
@@ -142,6 +151,32 @@ function loadFromLocal() {
             if (el) {
                 el.checked = true;
                 toggleClinPAM(el);
+            }
+            if (el) {
+                el.checked = true;
+                toggleClinPAM(el);
+            }
+        }
+
+        if (data._ui_clin_nega_alergia) {
+            const el = document.getElementById('clin_nega_alergia');
+            if (el) {
+                el.checked = true;
+                toggleClinAllergy(el);
+            }
+        }
+        if (data._ui_clin_nega_meds) {
+            const el = document.getElementById('clin_nega_meds');
+            if (el) {
+                el.checked = true;
+                toggleClinMeds(el);
+            }
+        }
+        if (data._ui_surg_nega_meds) {
+            const el = document.getElementById('surg_nega_meds');
+            if (el) {
+                el.checked = true;
+                toggleSurgMeds(el);
             }
         }
 
@@ -249,6 +284,48 @@ window.toggleClinDreno = toggleClinDreno;
 window.toggleSurgPVP = toggleSurgPVP;
 window.toggleSurgPAM = toggleSurgPAM;
 
+function toggleClinAllergy(checkbox) {
+    const detailInput = document.getElementById('clin_alergia_detalhe');
+    if (checkbox.checked) {
+        detailInput.value = 'Nega';
+        detailInput.disabled = true;
+    } else {
+        detailInput.value = '';
+        detailInput.disabled = false;
+        detailInput.focus();
+    }
+    saveToLocal();
+}
+
+function toggleClinMeds(checkbox) {
+    const detailInput = document.getElementById('clin_meds_habituais');
+    if (checkbox.checked) {
+        detailInput.value = 'Nego uso';
+        detailInput.disabled = true;
+    } else {
+        detailInput.value = '';
+        detailInput.disabled = false;
+        detailInput.focus();
+    }
+    saveToLocal();
+}
+
+function toggleSurgMeds(checkbox) {
+    const detailInput = document.getElementById('meds_habituais');
+    if (checkbox.checked) {
+        detailInput.value = 'Nego uso';
+        detailInput.disabled = true;
+    } else {
+        detailInput.value = '';
+        detailInput.disabled = false;
+        detailInput.focus();
+    }
+    saveToLocal();
+}
+
+window.toggleClinAllergy = toggleClinAllergy;
+window.toggleClinMeds = toggleClinMeds;
+window.toggleSurgMeds = toggleSurgMeds;
 // --- Toast System ---
 function showToast(message, type = 'success') {
     const container = document.getElementById('toastContainer');
@@ -477,9 +554,12 @@ Orientações:
 
     let invStr = invasionStrings.join('\n') || 'Nenhuma invasão';
 
-    const summary = `${leito}\n\n\n${instStr}\n\n\n${invStr}\n\n\n${section3}`;
+    const summary = `${leito}\n\n\n${instStr}\n\n${clinAlergias}\n${clinMeds}\n\n${invStr}\n\n\n${section3}`;
 
-    document.getElementById('summaryText').textContent = summary.trim();
+    // Clean up empty lines if fields are empty
+    const finalSummary = summary.replace(/\n\n\n+/g, '\n\n').trim();
+
+    document.getElementById('summaryText').textContent = finalSummary;
 
     // Store simplified content for reminder
     const reminderContent = `Leito: ${leito}\n\n${negatives.join('\n')}`;
