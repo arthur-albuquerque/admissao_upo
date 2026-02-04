@@ -652,6 +652,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Check for pending reminders (fallback for when app was closed)
     checkPendingReminders();
+
+    // Show "Como instalar" button only if NOT running as installed PWA
+    var isStandalone = window.matchMedia('(display-mode: standalone)').matches ||
+        window.navigator.standalone === true;
+    if (!isStandalone) {
+        var installBtn = document.getElementById('install-btn-container');
+        if (installBtn) installBtn.classList.remove('hidden');
+    }
 });
 
 // UI: Expand/Collapse Sections
