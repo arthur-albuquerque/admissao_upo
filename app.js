@@ -550,6 +550,13 @@ Orientações:
 
     let invStr = invasionStrings.join('\n') || 'Nenhuma invasão';
 
+    // Allergies and Medications
+    const clinNegaAlergia = document.getElementById('clin_nega_alergia');
+    const clinAlergias = clinNegaAlergia && clinNegaAlergia.checked ? 'Nega alergia' : (data.clin_alergia_detalhe ? `Alergia: ${data.clin_alergia_detalhe}` : '');
+
+    const clinNegaMeds = document.getElementById('clin_nega_meds');
+    const clinMeds = clinNegaMeds && clinNegaMeds.checked ? 'Nega o uso de medicações' : (data.clin_meds_habituais ? `Medicações: ${data.clin_meds_habituais}` : '');
+
     const summary = `${leito}\n\n\n${instStr}\n\n${clinAlergias}\n${clinMeds}\n\n${invStr}\n\n\n${section3}`;
 
     // Clean up empty lines if fields are empty
