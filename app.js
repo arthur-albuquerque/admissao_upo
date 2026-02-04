@@ -152,10 +152,6 @@ function loadFromLocal() {
                 el.checked = true;
                 toggleClinPAM(el);
             }
-            if (el) {
-                el.checked = true;
-                toggleClinPAM(el);
-            }
         }
 
         if (data._ui_clin_nega_alergia) {
@@ -288,10 +284,10 @@ function toggleClinAllergy(checkbox) {
     const detailInput = document.getElementById('clin_alergia_detalhe');
     if (checkbox.checked) {
         detailInput.value = 'Nega';
-        detailInput.disabled = true;
+        detailInput.classList.add('hidden');
     } else {
         detailInput.value = '';
-        detailInput.disabled = false;
+        detailInput.classList.remove('hidden');
         detailInput.focus();
     }
     saveToLocal();
@@ -301,10 +297,10 @@ function toggleClinMeds(checkbox) {
     const detailInput = document.getElementById('clin_meds_habituais');
     if (checkbox.checked) {
         detailInput.value = 'Nego uso';
-        detailInput.disabled = true;
+        detailInput.classList.add('hidden');
     } else {
         detailInput.value = '';
-        detailInput.disabled = false;
+        detailInput.classList.remove('hidden');
         detailInput.focus();
     }
     saveToLocal();
@@ -314,10 +310,10 @@ function toggleSurgMeds(checkbox) {
     const detailInput = document.getElementById('meds_habituais');
     if (checkbox.checked) {
         detailInput.value = 'Nego uso';
-        detailInput.disabled = true;
+        detailInput.classList.add('hidden');
     } else {
         detailInput.value = '';
-        detailInput.disabled = false;
+        detailInput.classList.remove('hidden');
         detailInput.focus();
     }
     saveToLocal();
@@ -647,10 +643,10 @@ function toggleAllergyInput(checkbox) {
     const detailInput = document.getElementById('alergia_detalhe');
     if (checkbox.checked) {
         detailInput.value = 'Nega';
-        detailInput.disabled = true;
+        detailInput.classList.add('hidden');
     } else {
         detailInput.value = '';
-        detailInput.disabled = false;
+        detailInput.classList.remove('hidden');
         detailInput.focus();
     }
     saveToLocal(); // Trigger save state
