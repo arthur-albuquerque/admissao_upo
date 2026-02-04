@@ -420,6 +420,45 @@ function restoreAdmission(raw) {
 window.navigateTo = navigateTo;
 window.resumeSession = resumeSession;
 
+// Show install instructions based on device
+function showInstallInstructions() {
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) ||
+        (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+    const isAndroid = /Android/.test(navigator.userAgent);
+
+    let imageSrc = 'instalar_android.jpg'; // default
+    if (isIOS) {
+        imageSrc = 'instalar_iOS.jpg';
+    }
+
+    // Create modal overlay
+    const overlay = document.createElement('div');
+    overlay.className = 'modal-overlay open';
+    overlay.id = 'install-modal';
+    overlay.innerHTML = `
+        <div class="modal" style="max-width: 90vw; max-height: 90vh;">
+            <div class="modal-header">
+                <span class="modal-title">📲 Como instalar</span>
+                <button type="button" onclick="closeInstallModal()" style="background: none; border: none; font-size: 1.5rem; cursor: pointer;">✕</button>
+            </div>
+            <div class="modal-body" style="padding: 0; overflow: auto; max-height: 70vh;">
+                <img src="${imageSrc}" alt="Instruções de instalação" style="width: 100%; height: auto; display: block;">
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-primary" onclick="closeInstallModal()">Entendi</button>
+            </div>
+        </div>
+    `;
+    document.body.appendChild(overlay);
+}
+window.showInstallInstructions = showInstallInstructions;
+
+function closeInstallModal() {
+    const modal = document.getElementById('install-modal');
+    if (modal) modal.remove();
+}
+window.closeInstallModal = closeInstallModal;
+
 function generateClinicalSummary() {
     const form = document.getElementById('clinicalForm');
     const formData = new FormData(form);
