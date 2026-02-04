@@ -630,6 +630,9 @@ document.addEventListener('DOMContentLoaded', () => {
     window.addEventListener('pagehide', () => {
         saveToLocal();
     });
+
+    // Check for pending reminders (fallback for when app was closed)
+    checkPendingReminders();
 });
 
 // UI: Expand/Collapse Sections
@@ -1015,54 +1018,149 @@ function resetForm(formId = 'admissionForm') {
     }
 }
 
-// Logic: Calendar Export
-function generateCalendarEvent() {
+// --- Reminder System (Notifications) ---
+
+const REMINDERS_KEY = 'upo_reminders';
+
+// Request notification permission
+async function requestNotificationPermission() {
+    if (!('Notification' in window)) {
+        showToast('Notificações não suportadas neste navegador', 'warning');
+        return false;
+    }
+
+    if (Notification.permission === 'granted') {
+        return true;
+    }
+
+    if (Notification.permission !== 'denied') {
+        const permission = await Notification.requestPermission();
+        return permission === 'granted';
+    }
+
+    showToast('Permissão de notificação negada. Ative nas configurações.', 'warning');
+    return false;
+}
+
+// Save reminder to localStorage
+function saveReminder(reminder) {
+    const reminders = JSON.parse(localStorage.getItem(REMINDERS_KEY) || '[]');
+    reminders.push(reminder);
+    localStorage.setItem(REMINDERS_KEY, JSON.stringify(reminders));
+}
+
+// Remove reminder from localStorage
+function removeReminder(id) {
+    let reminders = JSON.parse(localStorage.getItem(REMINDERS_KEY) || '[]');
+    reminders = reminders.filter(r => r.id !== id);
+    localStorage.setItem(REMINDERS_KEY, JSON.stringify(reminders));
+}
+
+// Show native notification
+function showNativeNotification(title, body, reminderId) {
+    if (Notification.permission === 'granted') {
+        const notification = new Notification(title, {
+            body: body,
+            icon: 'icon-192.png',
+            tag: reminderId,
+            requireInteraction: true
+        });
+
+        notification.onclick = () => {
+            window.focus();
+            notification.close();
+        };
+    }
+
+    // Remove from localStorage after firing
+    removeReminder(reminderId);
+}
+
+// Schedule a reminder
+function scheduleReminder(leito, content, minutes) {
+    const id = `reminder_${Date.now()}`;
+    const triggerTime = Date.now() + (minutes * 60 * 1000);
+
+    const reminder = {
+        id: id,
+        leito: leito,
+        content: content,
+        triggerTime: triggerTime,
+        createdAt: Date.now()
+    };
+
+    saveReminder(reminder);
+
+    // Schedule the notification
+    setTimeout(() => {
+        showNativeNotification(
+            `🔔 Rever paciente do leito ${leito}`,
+            content,
+            id
+        );
+    }, minutes * 60 * 1000);
+
+    return reminder;
+}
+
+// Check for pending/expired reminders on app load
+function checkPendingReminders() {
+    const reminders = JSON.parse(localStorage.getItem(REMINDERS_KEY) || '[]');
+    const now = Date.now();
+
+    const pendingReminders = reminders.filter(r => r.triggerTime <= now);
+    const futureReminders = reminders.filter(r => r.triggerTime > now);
+
+    // Re-schedule future reminders (in case app was reopened)
+    futureReminders.forEach(r => {
+        const delay = r.triggerTime - now;
+        setTimeout(() => {
+            showNativeNotification(
+                `🔔 Rever paciente do leito ${r.leito}`,
+                r.content,
+                r.id
+            );
+        }, delay);
+    });
+
+    // Show pending reminders as toast
+    if (pendingReminders.length > 0) {
+        pendingReminders.forEach(r => {
+            showToast(`⚠️ Lembrete pendente: Leito ${r.leito}`, 'warning');
+            removeReminder(r.id);
+        });
+    }
+}
+
+// Main function called from UI
+async function generateCalendarEvent() {
+    const hasPermission = await requestNotificationPermission();
+
+    if (!hasPermission) {
+        showToast('Sem permissão para notificações', 'error');
+        return;
+    }
+
     const minutesInput = prompt("Daqui a quantos minutos você quer ser lembrado?", "30");
     if (!minutesInput) return;
 
     const minutes = parseFloat(minutesInput);
-    if (isNaN(minutes)) return;
+    if (isNaN(minutes) || minutes <= 0) {
+        showToast('Valor inválido', 'error');
+        return;
+    }
 
-    const now = new Date();
-    const startDate = new Date(now.getTime() + (minutes * 60 * 1000));
-    const endDate = new Date(startDate.getTime() + (30 * 60 * 1000));
+    // Get reminder content
+    const content = document.getElementById('summaryModal').dataset.reminderContent || 'Revisão pendente';
 
-    const formatDate = (date) => {
-        return date.toISOString().replace(/-|:|\.\d+/g, '');
-    };
+    // Extract leito from content
+    const leitoMatch = content.match(/Leito:\s*(\S+)/i);
+    const leito = leitoMatch ? leitoMatch[1] : 'N/I';
 
-    const summary = document.getElementById('summaryText').textContent;
-    // Use stored simplified content if available, else fallback to full summary
-    const content = document.getElementById('summaryModal').dataset.reminderContent || summary;
+    scheduleReminder(leito, content, minutes);
 
-    const title = `Revisar Paciente (UPO)`;
-    const description = `Lembrete de revisão.\n\n${content}`;
-
-    const icsContent = [
-        'BEGIN:VCALENDAR',
-        'VERSION:2.0',
-        'PRODID:-//UPO//Admissao//PT',
-        'BEGIN:VEVENT',
-        `UID:${Date.now()}@upo.app`,
-        `DTSTAMP:${formatDate(now)}`,
-        `DTSTART:${formatDate(startDate)}`,
-        `DTEND:${formatDate(endDate)}`,
-        `SUMMARY:${title}`,
-        `DESCRIPTION:${description.replace(/\n/g, '\\n')}`,
-        'END:VEVENT',
-        'END:VCALENDAR'
-    ].join('\r\n');
-
-    const blob = new Blob([icsContent], { type: 'text/calendar;charset=utf-8' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.setAttribute('download', 'lembrete_upo.ics');
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-
-    showToast('Lembrete criado!', 'success');
+    showToast(`Lembrete agendado para ${minutes} minutos`, 'success');
+    closeModal();
 }
 // Logic: Check Reavaliacao
 function checkReavaliacao() {
