@@ -296,7 +296,7 @@ function toggleClinAllergy(checkbox) {
 function toggleClinMeds(checkbox) {
     const detailInput = document.getElementById('clin_meds_habituais');
     if (checkbox.checked) {
-        detailInput.value = 'Nego uso';
+        detailInput.value = 'Nega o uso';
         detailInput.classList.add('hidden');
     } else {
         detailInput.value = '';
@@ -309,7 +309,7 @@ function toggleClinMeds(checkbox) {
 function toggleSurgMeds(checkbox) {
     const detailInput = document.getElementById('meds_habituais');
     if (checkbox.checked) {
-        detailInput.value = 'Nego uso';
+        detailInput.value = 'Nega o uso';
         detailInput.classList.add('hidden');
     } else {
         detailInput.value = '';
